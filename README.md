@@ -1,4 +1,5 @@
 # Transactions-Tracker
+An independent side project where users can monitor their both incoming and outgoing expenses.
 
 	This program, using SQLite, stores information about each user, their transactions, and 
 program preferences. With a text user interface a user can log into an account (and log out), 
