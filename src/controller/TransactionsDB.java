@@ -34,7 +34,7 @@ public class TransactionsDB {
 	    abortTxnStmt = conn.prepareStatement("ROLLBACK TRANSACTION");
 	  }
   
-	/** 
+    /** 
 	 * Begins a new transaction which will only be committed when explicitly requested.
 	 *  @throws SQLException if a database access error occurs, the database connection is closed,
 	 *  	or the beginTxnStmt is closed.
@@ -70,8 +70,8 @@ public class TransactionsDB {
     		Class.forName("org.sqlite.JDBC");
 	        conn = DriverManager.getConnection(
 	        		 "jdbc:sqlite:/C:/sqlite/TransactionsTracker.db");
-	    } catch ( Exception e ) {
-	        System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	    } catch (Exception e) {
+	        System.err.println(e.getClass().getName() + ": " + e.getMessage());
 	        System.exit(0);
 	    }
     }
@@ -104,11 +104,7 @@ public class TransactionsDB {
 			ResultSet users = check.executeQuery();
 			
 			// If there are no values in the result set then this user name is not taken.
-			if (!users.next()) {
-				return false;
-			} else {
-				return true;
-			}
+			return users.next();
 			
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -208,7 +204,7 @@ public class TransactionsDB {
         	
         	// Insert parameters from Transaction object.
         	insert.setString(1, expense.getDescription());
-        	insert.setFloat(2, (float)expense.getAmount());
+        	insert.setFloat(2, (float) expense.getAmount());
         	insert.setString(3, expense.getDate().toString());
         	insert.setString(4, expense.getMemo());
         	insert.setString(5, expense.getCategory());

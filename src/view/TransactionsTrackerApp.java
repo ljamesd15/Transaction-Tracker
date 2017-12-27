@@ -30,7 +30,7 @@ public class TransactionsTrackerApp {
 	}
 	
 	/** Entry point for the text user interface */
-	public static void main( String args[] ) throws SQLException {
+	public static void main(String[] args) throws SQLException {
 		TransactionsDB db = new TransactionsDB();
 	    db.open();
 	      

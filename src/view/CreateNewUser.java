@@ -213,7 +213,7 @@ class CreateNewUser {
 			System.out.println("The updated user information is as follows...");
 			printUserInfo(userInfo);
 			
-			while(true) {
+			while (true) {
 				String question = "Is this information correct?";
 				boolean answer = TransactionHelper.yesNo(input, question);
 				

@@ -393,7 +393,7 @@ class CreateNewTransaction {
 			System.out.println("The updated transaction information is as follows...");
 			printTransInfo(transfer);
 			
-			while(true) {
+			while (true) {
 				String question = "Would you like to edit anything else?";
 				boolean answer = TransactionHelper.yesNo(input, question);
 				
