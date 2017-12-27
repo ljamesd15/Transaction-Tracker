@@ -46,60 +46,85 @@ public class TransactionsTrackerApp {
 	 
 	/** Runs the client until the user quits */
 	public void run() {
+		boolean keepGoing = true;
 		String response;
 		Scanner input = new Scanner(System.in);
 		
 	    System.out.println("Welcome to Transactions Tracker!");
 	    System.out.println("Type '0' to get a list of commands.");
 	    
-	    while (true) {
+	    while (keepGoing) {
 		    System.out.print('\n' + "What would you like to do?" + '\n' + "> ");
 		    response = input.nextLine();
 		    
-	    	if (response.equals("0")) {
-	    		// Print available commands
-	    		this.printCommands();
-	    	
-	    	} else if (response.equals("1") && this.currentUser == null) {
-	    		// Log in a user
-	    		this.login(input);
-	    		
-	    	} else if (response.equals("1") && this.currentUser != null) {
-	    		// Log out the current user
-	    		this.logout();
-	    		
-	    	} else if (response.equals("2")) {
-	    		// Creates a new user
-	    		this.createUser(input);	
-	    		
-	    	} else if (response.equals("3")) {
-	    		// Preferences
-	    		this.preferences();
-	    	
-	    	} else if (response.equals("4")) {
-	    		// Create a new expense
-	    		this.addTransaction(input);
-	    		
-	    	} else if (response.equals("5")) {
-	    		// Show transaction history
-	    		this.showTransactionHistory();
-	    	
-	    	} else if (response.equals("exit")) {
-	    		// Exit the application
-	    		this.exit();
-	    		break;
-
-	    	} else {
-	    		System.out.println("Unrecognised command : " + response);
-				System.out.println("Type '0' to see a list of "
-						+ "valid commands.");
+		    // Prevent null pointer exceptions.
+		    if (response == null) {
+		    	this.unrecognisedCommand("");
+		    }
+		    
+		    // For ease of reading used switch statements to determine what the program 
+		    // should do next given a user input.
+		    switch (response) {
+		    
+		    	case "0":
+		    		// Print available commands
+		    		this.printCommands();
+		    		break;
+		    		
+		    	case "1":	
+		    		if (this.currentUser == null) {
+		    			// Log in a user
+		    			this.login(input);
+		    		} else {
+		    			// Log out the current user
+		    			this.logout();
+		    		}
+		    		break;
+		    		
+		    	case "2":
+		    		// Creates a new user
+		    		this.createUser(input);
+		    		break;
+		    		
+		    	case "3":
+		    		// Preferences
+		    		this.preferences();
+		    		break;
+		    	
+		    	case "4":
+		    		// Create a new expense
+		    		this.addTransaction(input);
+		    		break;
+		    		
+		    	case "5":
+		    		// Show transaction history
+		    		this.showTransactionHistory();
+		    		break;
+		    		
+		    	case "exit":
+	    	   		// Exit the application
+		    		this.exit();
+		    		keepGoing = false;
+		    		break;
+		    	
+		    	default:
+		    		// Does not fit into any cases.
+		    		this.unrecognisedCommand(response);
 	    	}
 	    }
 	}
-
-	/**
-	 * Prints the available commands for this program.
+	
+	/** 
+	 * Prints a message alerting the user that the command was invalid.
+	 * @param The command which was invalid.
 	 */
+	private void unrecognisedCommand(String response) {
+		System.out.println("Unrecognised command : " + response);
+		System.out.println("Type '0' to see a list of "
+				+ "valid commands.");
+	}
+
+	/** Prints the available commands for this program. */
 	private void printCommands() {
 		System.out.println('\n' + "Commands are:");
 		System.out.println("'0' to get a list of commands.");
