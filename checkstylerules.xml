@@ -53,10 +53,7 @@
 <module name="Checker">
     <property name="fileExtensions" value="java"/>
 
-    <module name="SuppressionCommentFilter">
-        <property name="offCommentFormat"
-                  value="Generated from [a-zA-Z]*\.g4 by ANTLR"/> 
-    </module>
+    
 
     <module name="TreeWalker">
         <module name="FileContentsHolder"/>
@@ -251,5 +248,7 @@
         <module name="ParenPad"/>
         <module name="TypecastParenPad"/>
         <module name="WhitespaceAfter"/>
-    </module>
+    <module name="SuppressionCommentFilter">
+        <property name="offCommentFormat" value="Generated from [a-zA-Z]*\.g4 by ANTLR" /> 
+    </module></module>
 </module>
