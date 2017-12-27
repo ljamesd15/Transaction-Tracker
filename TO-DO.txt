@@ -1,0 +1,21 @@
+TO DO LIST: 
+
+- add tests
+
+- add switch statements
+
+- ability to go back at any point
+
+- add this to a read me file
+
+- Program options : preferences, show history
+
+- Lock out a user after a number of incorrect attempts 
+	to log in
+
+- Encrypt password storage
+
+- make the adding a transaction a DB transaction where 
+	I can rollback if need be.
+
+- GUI
