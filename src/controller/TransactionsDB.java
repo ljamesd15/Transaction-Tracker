@@ -69,7 +69,7 @@ public class TransactionsDB {
     	try {
     		Class.forName("org.sqlite.JDBC");
 	        conn = DriverManager.getConnection(
-	        		 "jdbc:sqlite:/C:/sqlite/TransactionsTracker.db");
+	        		 "jdbc:sqlite:/C:/sqlite/Transaction-Tracker.db");
 	    } catch (Exception e) {
 	        System.err.println(e.getClass().getName() + ": " + e.getMessage());
 	        System.exit(0);
