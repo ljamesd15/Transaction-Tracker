@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public class Transaction {
 
 	private final String description;
-	private final double amount;
+	private final int amount_in_cents;
 	private final LocalDate date;
 	private final String category;
 	private final String memo;
@@ -29,7 +29,7 @@ public class Transaction {
 	 */
 	private Transaction(TransactionBuilder builder) {
 		this.description = builder.description;
-		this.amount = builder.amount;
+		this.amount_in_cents = builder.amount_in_cents;
 		this.date = builder.date;
 		this.category = builder.category;
 		this.memo = builder.memo;
@@ -46,10 +46,10 @@ public class Transaction {
 	}
 	
 	/**
-	 * @return The amount that was transfered due to this transaction.
+	 * @return The amount that was transfered due to this transaction in cents.
 	 */
-	public double getAmount() {
-		return this.amount;
+	public int getAmountInCents() {
+		return this.amount_in_cents;
 	}
 	
 	/**
@@ -80,7 +80,7 @@ public class Transaction {
 	 */
 	public static class TransactionBuilder {
 		
-		private double amount;
+		private int amount_in_cents;
 		private String description;
 		private String category;
 		private String memo;
@@ -118,23 +118,23 @@ public class Transaction {
 		/**
 		 * Sets the amount of the this transaction. If this transaction's category is a deposit
 		 * then the amount will be made positive and otherwise will be made negative.
-		 * @param amount is the amount that was transfered during this transaction.
+		 * @param amount is the amount that was transfered during this transaction in cents.
 		 */
-		public void setAmount(double amount) {
+		public void setAmountInCents(int amount) {
 			// If this transaction is explicitly said to be a deposit then make amount positive,
 			// otherwise change amount to be negative.
 			if (this.category != null && this.category.equals("Deposit")) {
-				this.amount = Math.abs(amount);
+				this.amount_in_cents = Math.abs(amount);
 			} else {
-				this.amount = -1 * Math.abs(amount);
+				this.amount_in_cents = -1 * Math.abs(amount);
 			}
 		}
 		
 		/**
-		 * @return the amount of this transaction.
+		 * @return the amount of this transaction in cents.
 		 */
-		public double getAmount() {
-			return this.amount;
+		public int getAmountInCents() {
+			return this.amount_in_cents;
 		}
 		
 		/**
@@ -174,7 +174,7 @@ public class Transaction {
 			
 			// Resetting the amount so that if this transactions amount is positive only if 
 			// it is a deposit.
-			this.setAmount(this.amount);
+			this.setAmountInCents(this.amount_in_cents);
 		}
 		
 		/**

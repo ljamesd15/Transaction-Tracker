@@ -178,7 +178,7 @@ public class TransactionsDB {
   	  	  }
   	  	  
   	  	  return new User(results.getString("username"), results.getString("name"), 
-  	  			  (double) results.getFloat("balance"), results.getString("password"));
+  	  			  results.getInt("balance_in_cents") / 100.0, results.getString("password"));
   	  	  
   	  } catch (SQLException e) {
   		  System.out.println(e.getMessage());
@@ -192,7 +192,7 @@ public class TransactionsDB {
      * @param username is the user who the transaction will be added to.
      * @return The new account balance of the user or null if an exception occurred.
      */
-    public Double addExpense(Transaction expense, String username) {
+    public Double addExpense(Transaction expense, String username) {    	
     	// Initialize query and statement.
     	PreparedStatement insert;
     	String sqlStmt = "INSERT INTO Transactions VALUES (?, ?, ?, ? , ?, ?)";
@@ -204,7 +204,7 @@ public class TransactionsDB {
         	
         	// Insert parameters from Transaction object.
         	insert.setString(1, expense.getDescription());
-        	insert.setFloat(2, (float) expense.getAmount());
+        	insert.setFloat(2, expense.getAmountInCents());
         	insert.setString(3, expense.getDate().toString());
         	insert.setString(4, expense.getMemo());
         	insert.setString(5, expense.getCategory());
@@ -214,7 +214,8 @@ public class TransactionsDB {
     		insert.execute();
     		
     		// Update user's account balance
-        	return updateBalance(username, expense.getAmount());
+        	Integer newBalance = updateBalance(username, expense.getAmountInCents());
+        	return new Double(newBalance.doubleValue() / 100.0);
         	
     	} catch (SQLException e) {
     		System.out.println(e.getMessage());
@@ -228,12 +229,12 @@ public class TransactionsDB {
      * @param amount is the change applied to the user's balance.
      * @return The new account balance or null if there was an exception.
      */
-    private Double updateBalance(String username, double amount) {
+    private Integer updateBalance(String username, int amount) {
     	// Initialize both SQL statement and the prepared statements.
     	PreparedStatement check;
-    	String checkStmt = "SELECT balance FROM Users WHERE username = ?";
+    	String checkStmt = "SELECT balance_in_cents FROM Users WHERE username = ?";
     	PreparedStatement update;
-    	String updateStmt = "UPDATE Users SET balance = ? WHERE username = ?";
+    	String updateStmt = "UPDATE Users SET balance_in_cents = ? WHERE username = ?";
     	
     	try {
         	// Get current balance value
@@ -244,7 +245,7 @@ public class TransactionsDB {
     		
     		// Move the cursor forward
     		checkResult.next();
-    		double balance = checkResult.getFloat(1);
+    		int balance = checkResult.getInt(1);
     		
     		// Calculate new balance
     		balance = balance + amount;
@@ -252,7 +253,7 @@ public class TransactionsDB {
     		// Update user balance
     		update = this.conn.prepareStatement(updateStmt);
     		update.clearParameters();
-    		update.setFloat(1, (float) balance);
+    		update.setFloat(1, balance);
     		update.setString(2, username);
     		update.execute();
     		return balance;

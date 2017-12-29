@@ -92,7 +92,7 @@ class CreateNewTransaction {
 			System.out.print('\n' + "What was the amount of the transaction?" + '\n' + "> ");
 			response = input.nextLine();
 			try {
-				transfer.setAmount(Double.parseDouble(response));
+				transfer.setAmountInCents((int) Math.round(Double.parseDouble(response) * 100));
 				break;
 				
 			} catch (NumberFormatException e) {
@@ -418,7 +418,7 @@ class CreateNewTransaction {
 		System.out.println();
 		
 		System.out.print("Amount:    $");
-		System.out.printf("%+.2f", transfer.getAmount());
+		System.out.printf("%+.2f", transfer.getAmountInCents() / 100.0);
 		System.out.println();
 		
 		System.out.print("Date:      ");

@@ -192,29 +192,8 @@ class Settings {
 	private static void removeCategory(TransactionsDB db, Scanner input) {
 		// Determine which categories which can be removed. 
 		// (Categories added which are not default categories.)
-		String[] categories = db.getCategories();
-		
-		int numOfNonDefaultCategories = 0;
-		String[] nonDefaultCategories = new String[categories.length - DEFAULT_CATEGORIES.length];
-		for (int i = 0; i < categories.length; i++) {
-			boolean contained = false;
-			
-			// Nested loop but default categories length is 4. So O(categories.length) runtime
-			for (int j = 0; j < DEFAULT_CATEGORIES.length; j++) {
-				
-				if (categories[i].equals(DEFAULT_CATEGORIES[j])) {
-					// This category is a default category.
-					contained = true;
-				}
-			}
-			
-			// If the category is not contained in both arrays then add it to the 
-			// non-default category array.
-			if (!contained) {
-				nonDefaultCategories[numOfNonDefaultCategories] = categories[i];
-				numOfNonDefaultCategories++;
-			}
-		}
+		String[] nonDefaultCategories = findNonDefaultCategories(db);
+		int numOfNonDefaultCategories = nonDefaultCategories.length;
 		
 		// If no non-default categories exist then alert user and return.
 		if (numOfNonDefaultCategories == 0) {
@@ -270,6 +249,39 @@ class Settings {
 			System.out.println("Invalid response. " + categoryName 
 					+ " did not match any of the removable categories.");
 		}
+	}
+	
+	/**
+	 * Finds the categories which are not the default categories of this DB.
+	 * @param db is the database whose categories are examined.
+	 * @return A string array of those categories in this DB which are not default.
+	 */
+	private static String[] findNonDefaultCategories(TransactionsDB db) {
+		String[] categories = db.getCategories();
+		
+		int numOfNonDefaultCategories = 0;
+		String[] nonDefaultCategories = new String[categories.length - DEFAULT_CATEGORIES.length];
+		for (int i = 0; i < categories.length; i++) {
+			boolean contained = false;
+			
+			// Nested loop but default categories length is 4. So O(categories.length) runtime
+			for (int j = 0; j < DEFAULT_CATEGORIES.length; j++) {
+				
+				if (categories[i].equals(DEFAULT_CATEGORIES[j])) {
+					// This category is a default category.
+					contained = true;
+				}
+			}
+			
+			// If the category is not contained in both arrays then add it to the 
+			// non-default category array.
+			if (!contained) {
+				nonDefaultCategories[numOfNonDefaultCategories] = categories[i];
+				numOfNonDefaultCategories++;
+			}
+		}
+		
+		return nonDefaultCategories;
 	}
 
 	/**

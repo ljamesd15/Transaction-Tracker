@@ -20,7 +20,7 @@ class CreateNewUser {
 	protected static final int MIN_PASSWORD_CHARS = 8;
 	
 	// Starting balance of all new users
-	private static final double STARTING_BALANCE = 0.0;
+	private static final int STARTING_BALANCE = 0;
 	
 	/**
 	 * Uses user given information to make a new user object.
