@@ -24,18 +24,16 @@ class Settings {
 	 * @param currentUser is the currently logged in user.
 	 */
 	protected static void run(TransactionsDB db, Scanner input, User currentUser) {
-		// Has user choose between user and program settings.
-		System.out.println('\n' + "Settings:");
 		printSettingsCommands();
 		
 		// Initializing user response.
 		String response;
-		boolean validCommand = false;
+		boolean keepGoing = true;
 		
 		// While a valid command has not been chosen.
-		while (!validCommand) {
-		    System.out.print('\n' + "What would you like to do?" + '\n' + "> ");
-			response = input.nextLine();
+		while (keepGoing) {
+		    System.out.print('\n' + "(Settings) What would you like to do?" + '\n' + "> ");
+			response = input.nextLine().toLowerCase();
 			
 			// Cases for user input.
 			switch (response) {
@@ -46,19 +44,22 @@ class Settings {
 					break;
 					
 				case "1":
-					// User preferences
-					userSettings(db, input, currentUser);
-					validCommand = true;
+					// Program preferences
+					programSettings(db, input);
 					break;
 				
 				case "2":
-					// Program preferences
-					programSettings(db, input);
-					validCommand = true;
+					// User preferences
+					userSettings(db, input, currentUser);
+					break;
+					
+				case "back":
+					// Return to main menu
+					keepGoing = false;
 					break;
 					
 				default:
-					System.out.println("Unrecognised command : " + response);
+					System.out.println("Unrecognised command: " + response);
 					System.out.println("Type '0' to see a list of "
 							+ "valid commands.");
 			}
@@ -67,9 +68,11 @@ class Settings {
 
 	/** Prints the available settings commands. */
 	private static void printSettingsCommands() {
-		System.out.println("'0' for settings commands list." + '\n'
-				 + "'1' to go to program settings." + '\n'
-				 + "'2' to go to user settings.");
+		System.out.println('\n' + "Settings menu commands are:" + '\n'
+				+ "'0' to get a list of settings menu commands." + '\n'
+				+ "'1' to go to program settings." + '\n'
+				+ "'2' to go to user settings." + '\n'
+				+ "'back' to return to the main menu.");
 		
 	}
 
@@ -79,17 +82,16 @@ class Settings {
 	 * @param input the scanner to read user input.
 	 */
 	private static void programSettings(TransactionsDB db, Scanner input) {
-		System.out.println('\n' + "Program Settings:");
 		printProgramSettingsCommands();
 		
 		// Initializing user response.
 		String response;
-		boolean validCommand = false;
+		boolean keepGoing = true;
 		
 		// While a valid command has not been chosen.
-		while (!validCommand) {
-		    System.out.print('\n' + "What would you like to do?" + '\n' + "> ");
-			response = input.nextLine();
+		while (keepGoing) {
+		    System.out.print('\n' + "(Program Settings) What would you like to do?" + '\n' + "> ");
+			response = input.nextLine().toLowerCase();
 			
 			// Cases for user input.
 			switch (response) {
@@ -102,17 +104,20 @@ class Settings {
 				case "1":
 					// Add a category
 					addCategory(db, input);
-					validCommand = true;
 					break;
 				
 				case "2":
 					// Remove a category
 					removeCategory(db, input);
-					validCommand = true;
 					break;
-					
+				
+				case "back":
+					// Return to settings menu
+					keepGoing = false;
+					break;
+				
 				default:
-					System.out.println("Unrecognised command : " + response);
+					System.out.println("Unrecognised command: " + response);
 					System.out.println("Type '0' to see a list of "
 							+ "valid commands.");
 			}
@@ -121,9 +126,11 @@ class Settings {
 	
 	/** Prints program settings commands. */
 	private static void printProgramSettingsCommands() {
-		System.out.println("'0' for program settings commands list." + '\n'
-				 + "'1' to add a new expense category." + '\n'
-				 + "'2' to remove an expense category.");
+		System.out.println('\n' + "Program settings menu commands are:" + '\n'
+				+ "'0' to get a list of program settings menu commands." + '\n'
+				+ "'1' to add a new expense category." + '\n'
+				+ "'2' to remove an expense category." + '\n'
+				+ "'back' to return to the settings menu.");
 	}
 
 	/**
@@ -134,16 +141,16 @@ class Settings {
 	private static void addCategory(TransactionsDB db, Scanner input) {
 		String[] categories = db.getCategories();
 
-		// Print out current categories.
-		System.out.print("Current categories are ");
-		for (int i = 0; i < categories.length - 1; i++) {
-			System.out.print(categories[i] + ", ");
-		}
-		System.out.println("and " + categories[categories.length - 1] + ".");
-		
-		// While the user inputs a string which matches a current category.
 		while (true) {
-			System.out.println('\n' + "What is the name of the category you would like to add?");
+			// Print out current categories.
+			System.out.print("Current categories are ");
+			for (int i = 0; i < categories.length - 1; i++) {
+				System.out.print(categories[i] + ", ");
+			}
+			System.out.println("and " + categories[categories.length - 1] + ".");
+			
+			System.out.print('\n' + "What is the name of the category you would like to add?"
+					+ '\n' + "> ");
 			String newCategory = input.nextLine();
 			
 			if (newCategory.length() > MAX_CATNAME_CHARS) {
@@ -151,22 +158,29 @@ class Settings {
 						+ " characters long.");
 			}
 			
+			// Determine if this is a new category.
+			boolean isNewCategory = true;
 			for (int i = 0; i < categories.length; i++) {
 				if (categories[i].toLowerCase().equals(newCategory.toLowerCase())) {
-					System.out.println(newCategory + " is already a category");
-					System.out.println("Please pick a different new category name.");
-					continue;
+					System.out.println(categories[i] + " is already a category, "
+							+ "please pick a different new category name.");
+					isNewCategory = false;
 				}
 			}
 			
-			// Add category to DB
-			boolean executed = db.addCategory(newCategory);
-			
-			// If update ran into an exception then alert user.
-			if (!executed) {
-				System.out.println("Unable to add category, please try again later.");
+			// If its a new category add it to the DB
+			if (isNewCategory) {
+				// Add category to DB
+				boolean executed = db.addCategory(newCategory);
+				
+				// Inform user of outcome.
+				if (executed) {
+					System.out.println("Successfully added category: " + newCategory);
+				} else {
+					System.out.println("Unable to add category, please try again later.");
+				}
+				break;
 			}
-			break;
 		}
 	}
 	
@@ -208,26 +222,28 @@ class Settings {
 			return;
 		}
 
-		
 		// While the user input does not match a non-default category.
 		while (true) {
 			
 			// Print out non-default categories
 			System.out.print("Removable categories: ");
 			
-			// If only one non-default category then print it differently.
+			// Print non-default categories differently depending on if there is 1, 2, or more.
 			if (numOfNonDefaultCategories == 1) {
 				System.out.println(nonDefaultCategories[0] + ".");
 				
+			} else  if (numOfNonDefaultCategories == 2){
+				System.out.println(nonDefaultCategories[0] + " and " + nonDefaultCategories[1]);
+				
 			} else {
-				for (int i = 0; i < numOfNonDefaultCategories; i++) {
+				for (int i = 0; i < numOfNonDefaultCategories - 1; i++) {
 					System.out.print(nonDefaultCategories[i] + ", ");
 				}
 				System.out.println("and " + nonDefaultCategories[numOfNonDefaultCategories - 1]);
 			}
 			
-			System.out.println('\n' + "What is the name of the category you would like to "
-					+ "remove?");
+			System.out.print('\n' + "What is the name of the category you would like to "
+					+ "remove?" + '\n' + "> ");
 			String categoryName = input.nextLine();
 			
 			// Determine if user response matches a non-default category. 
@@ -238,8 +254,11 @@ class Settings {
 					// Remove category from DB
 					boolean executed = db.removeCategory(nonDefaultCategories[i]);
 					
-					// If update ran into an exception then alert user.
-					if (!executed) {
+					// Inform user of outcome
+					if (executed) {
+						System.out.println("Successfully removed category: " 
+								+ nonDefaultCategories[i]);
+					} else {
 						System.out.println("Unable to remove category, please try again later.");
 					}
 					
@@ -260,17 +279,16 @@ class Settings {
 	 * @param user is the user whose settings will be accessed.
 	 */
 	private static void userSettings(TransactionsDB db, Scanner input, User user) {
-		System.out.println('\n' + "User Settings:");
 		printUserSettingsCommands();
 		
 		// Initializing user response.
 		String response;
-		boolean validCommand = false;
+		boolean keepGoing = true;
 		
 		// While a valid command has not been chosen.
-		while (!validCommand) {
-		    System.out.print('\n' + "What would you like to do?" + '\n' + "> ");
-			response = input.nextLine();
+		while (keepGoing) {
+		    System.out.print('\n' + "(User Settings) What would you like to do?" + '\n' + "> ");
+			response = input.nextLine().toLowerCase();
 			
 			// Cases for user input.
 			switch (response) {
@@ -283,17 +301,20 @@ class Settings {
 				case "1":
 					// Change full name
 					editUserFullName(db, input, user);
-					validCommand = true;
 					break;
 				
 				case "2":
 					// Change password
 					editUserPassword(db, input, user);
-					validCommand = true;
+					break;
+					
+				case "back":
+					// Go back to settings menu
+					keepGoing = false;
 					break;
 					
 				default:
-					System.out.println("Unrecognised command : " + response);
+					System.out.println("Unrecognised command: " + response);
 					System.out.println("Type '0' to see a list of "
 							+ "valid commands.");
 			}
@@ -302,9 +323,11 @@ class Settings {
 
 	/** Prints the available commands of the user settings menu. */
 	private static void printUserSettingsCommands() {
-		System.out.println("'0' for user settings commands list." + '\n'
-						 + "'1' to edit the full name of a user." + '\n'
-						 + "'2' to edit the password of the user.");
+		System.out.println('\n' + "User settings menu commands are:" + '\n'
+				+ "'0' to get a list of user settings menu commands." + '\n'
+				+ "'1' to edit the full name of a user." + '\n'
+				+ "'2' to edit the password of the user." + '\n'
+				+ "'back' to return to the settings menu.");
 	}
 	
 	/** 
@@ -316,9 +339,9 @@ class Settings {
 	private static void editUserFullName(TransactionsDB db, Scanner input, User user) {
 		
 		while (true) {
-			System.out.println("Please enter your current password" + '\n' + "> ");
+			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
 			String oldPassword = input.nextLine();
-			System.out.println("Please enter your new full name" + '\n' + "> ");
+			System.out.print("Please enter your new full name" + '\n' + "> ");
 			String newFullName = input.nextLine();
 			
 			// Check if user typed old password matches the old password.
@@ -332,13 +355,18 @@ class Settings {
 				
 			} else {
 				// Have DB change the user's full name
+				String oldName = user.getFullName();
 				user.setUserFullName(newFullName);
 				boolean executed = db.changeFullName(user);
 				
-				// If update ran into an exception then alert user.
-				if (!executed) {
+				// Inform user of output.
+				if (executed) {
+					System.out.println("Full name changed from '" + oldName + "' to '"
+							+ newFullName + "'.");
+				} else {
 					System.out.println("Unable to change full name, please try again later.");
 				}
+
 				break;
 			}
 		}
@@ -353,9 +381,9 @@ class Settings {
 	private static void editUserPassword(TransactionsDB db, Scanner input, User user) {
 		
 		while (true) {
-			System.out.println("Please enter your current password" + '\n' + "> ");
+			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
 			String oldPassword = input.nextLine();
-			System.out.println("Please enter your new password" + '\n' + "> ");
+			System.out.print("Please enter your new password" + '\n' + "> ");
 			String newPassword = input.nextLine();
 			
 			// Check if user typed old password matches the old password.
@@ -377,10 +405,13 @@ class Settings {
 				user.setPassword(newPassword);
 				boolean executed = db.changePassword(user);
 				
-				// If update ran into an exception then alert user.
-				if (!executed) {
+				// Inform user of output.
+				if (executed) {
+					System.out.println("Password successfully changed.");
+				} else {
 					System.out.println("Unable to change password, please try again later.");
 				}
+
 				break;
 			}
 		}

@@ -53,8 +53,8 @@ public class TransactionsTrackerApp {
 	    System.out.println("Type '0' to get a list of commands.");
 	    
 	    while (keepGoing) {
-		    System.out.print('\n' + "What would you like to do?" + '\n' + "> ");
-		    response = input.nextLine();
+		    System.out.print('\n' + "(Main Menu) What would you like to do?" + '\n' + "> ");
+		    response = input.nextLine().toLowerCase();
 		    
 		    // Prevent null pointer exceptions.
 		    if (response == null) {
@@ -118,15 +118,15 @@ public class TransactionsTrackerApp {
 	 * @param The command which was invalid.
 	 */
 	private void unrecognisedCommand(String response) {
-		System.out.println("Unrecognised command : " + response);
+		System.out.println("Unrecognised command: " + response);
 		System.out.println("Type '0' to see a list of "
 				+ "valid commands.");
 	}
 
 	/** Prints the available commands for this program. */
 	private void printCommands() {
-		System.out.println('\n' + "Commands are:");
-		System.out.println("'0' to get a list of commands.");
+		System.out.println('\n' + "Main menu commands are:");
+		System.out.println("'0' to get a list of main menu commands.");
 		
 		// If no user logged in, option 1 is to log in.
 		if (this.currentUser == null) {
@@ -202,14 +202,13 @@ public class TransactionsTrackerApp {
 	 * @param input the scanner to read user input.
 	 */
 	private void settings(Scanner input) {
-		// Must be logged in before editing settings.
 		if (this.currentUser == null) {
+			// Must be logged in before editing settings.
 			System.out.println("Please log in before editing settings.");
-			this.login(input);
+		} else {
+			// Go to settings.
+			Settings.run(this.db, input, this.currentUser);
 		}
-		
-		// Go to settings.
-		Settings.run(this.db, input, this.currentUser);
 	}
 	
 	/**
