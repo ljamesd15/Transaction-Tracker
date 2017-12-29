@@ -6,7 +6,7 @@ This program, using SQLite, stores information about each user, their transactio
 PATCH NOTES
 
 v 1.3.11 Changed the way transaction information is printed when asking the user if the transaction
-	info is correct. (12/29/17)
+	info is correct. Fixed precision rounding errors. (12/29/17)
 
 v 1.3.10 Added option for users to edit various settings such as their full name, password, and
 	transaction categories. (12/28/18)

@@ -2,20 +2,16 @@ TO DO LIST:
 
 - add tests
 
-- add switch statements
+- Program options : show history
 
-- ability to go back at any point
-
-- add this to a read me file
-
-- Program options : preferences, show history
-
-- Lock out a user after a number of incorrect attempts 
-	to log in
+- Lock out a user after a number of incorrect attempts to log in
 
 - Encrypt password storage
 
-- make the adding a transaction a DB transaction where 
-	I can rollback if need be.
+- make the adding a transaction a DB transaction where I can rollback if need be.
+	
+- If SQLite DB is locked hold transaction information and add it when available.
 
-- GUI
+- Instead of printing error messages to console print them to a log txt file along with stack trace
+
+- GUI (ability to go back at any point)
