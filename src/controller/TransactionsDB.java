@@ -71,7 +71,7 @@ public class TransactionsDB {
 	        conn = DriverManager.getConnection(
 	        		 "jdbc:sqlite:/C:/sqlite/Transaction-Tracker.db");
 	    } catch (Exception e) {
-	        System.err.println(e.getClass().getName() + ": " + e.getMessage());
+	        TransactionHelper.printErrorToLog(e);
 	        System.exit(0);
 	    }
     }
@@ -107,8 +107,7 @@ public class TransactionsDB {
 			return users.next();
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-			System.out.println("Please try again later.");
+			TransactionHelper.printErrorToLog(e);
 			return true;
 		}
 	}
@@ -181,7 +180,7 @@ public class TransactionsDB {
   	  			  results.getInt("balance_in_cents") / 100.0, results.getString("password"));
   	  	  
   	  } catch (SQLException e) {
-  		  System.out.println(e.getMessage());
+  		  TransactionHelper.printErrorToLog(e);
   		  return null;
   	  }
     }
@@ -218,7 +217,7 @@ public class TransactionsDB {
         	return new Double(newBalance.doubleValue() / 100.0);
         	
     	} catch (SQLException e) {
-    		System.out.println(e.getMessage());
+    		TransactionHelper.printErrorToLog(e);
     		return null;
     	}
     }
@@ -259,7 +258,7 @@ public class TransactionsDB {
     		return balance;
     		
     	} catch (SQLException e) {
-    		System.out.println(e.getMessage());
+    		TransactionHelper.printErrorToLog(e);
     		return null;
     	}
     }
@@ -303,7 +302,7 @@ public class TransactionsDB {
 			return categories;
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			TransactionHelper.printErrorToLog(e);
 			return null;
 		}
 	}
@@ -333,7 +332,7 @@ public class TransactionsDB {
 			return true;
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			TransactionHelper.printErrorToLog(e);
 			return false;
 		}
 	}
@@ -363,7 +362,7 @@ public class TransactionsDB {
 			return true;
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			TransactionHelper.printErrorToLog(e);
 			return false;
 		}
 	}
@@ -391,7 +390,7 @@ public class TransactionsDB {
 			return true;
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			TransactionHelper.printErrorToLog(e);
 			return false;
 		}
 	}
@@ -419,7 +418,7 @@ public class TransactionsDB {
 			return true;
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			TransactionHelper.printErrorToLog(e);
 			return false;
 		}
 	}

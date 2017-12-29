@@ -4,6 +4,8 @@ TO DO LIST:
 
 - Program options : show history
 
+- Remember me option to store user info to prevent repeated log ins
+
 - Lock out a user after a number of incorrect attempts to log in
 
 - Encrypt password storage
@@ -11,7 +13,5 @@ TO DO LIST:
 - make the adding a transaction a DB transaction where I can rollback if need be.
 	
 - If SQLite DB is locked hold transaction information and add it when available.
-
-- Instead of printing error messages to console print them to a log txt file along with stack trace
 
 - GUI (ability to go back at any point)

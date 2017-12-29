@@ -3,6 +3,7 @@ package view;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import controller.TransactionHelper;
 import controller.TransactionsDB;
 import model.Transaction;
 import model.User;
@@ -35,7 +36,7 @@ public class TransactionsTrackerApp {
 	      
 	    try {
 	    	//db.prepare();
-	    	  
+	    	TransactionHelper.prepare();
 	    	TransactionsTrackerApp app = new TransactionsTrackerApp(db);
 	    	app.run();
 	    } finally {
