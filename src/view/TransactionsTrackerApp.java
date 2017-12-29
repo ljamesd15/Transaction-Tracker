@@ -15,8 +15,7 @@ import model.User;
 public class TransactionsTrackerApp {
 	
 	// An array of strings containing the default user expense categories.
-	private final String[] defaultCategories = new String[]
-			{"Deposit", "Food", "Housing", "Transportation", "Misc."};
+	private final String[] defaultCategories = Settings.DEFAULT_CATEGORIES;
 	
 	// The Transaction Tracker database.
 	private final TransactionsDB db;
@@ -54,8 +53,8 @@ public class TransactionsTrackerApp {
 	    System.out.println("Type '0' to get a list of commands.");
 	    
 	    while (keepGoing) {
-		    System.out.print('\n' + "What would you like to do?" + '\n' + "> ");
-		    response = input.nextLine();
+		    System.out.print('\n' + "(Main Menu) What would you like to do?" + '\n' + "> ");
+		    response = input.nextLine().toLowerCase();
 		    
 		    // Prevent null pointer exceptions.
 		    if (response == null) {
@@ -87,8 +86,8 @@ public class TransactionsTrackerApp {
 		    		break;
 		    		
 		    	case "3":
-		    		// Preferences
-		    		this.preferences();
+		    		// Settings
+		    		this.settings(input);
 		    		break;
 		    	
 		    	case "4":
@@ -119,15 +118,15 @@ public class TransactionsTrackerApp {
 	 * @param The command which was invalid.
 	 */
 	private void unrecognisedCommand(String response) {
-		System.out.println("Unrecognised command : " + response);
+		System.out.println("Unrecognised command: " + response);
 		System.out.println("Type '0' to see a list of "
 				+ "valid commands.");
 	}
 
 	/** Prints the available commands for this program. */
 	private void printCommands() {
-		System.out.println('\n' + "Commands are:");
-		System.out.println("'0' to get a list of commands.");
+		System.out.println('\n' + "Main menu commands are:");
+		System.out.println("'0' to get a list of main menu commands.");
 		
 		// If no user logged in, option 1 is to log in.
 		if (this.currentUser == null) {
@@ -138,7 +137,7 @@ public class TransactionsTrackerApp {
 		}
 		
 		System.out.println("'2' to create a new user.");
-		System.out.println("'3' for program preferences.");
+		System.out.println("'3' for settings.");
 		System.out.println("'4' to enter a new expense.");
 		System.out.println("'5' to display your transaction history.");
 		System.out.println("'exit' to leave.");
@@ -171,7 +170,7 @@ public class TransactionsTrackerApp {
 		}
 		
 		this.currentUser = loggedInUser;
-		System.out.println("Hello " + this.currentUser.getName());
+		System.out.println("Hello " + this.currentUser.getFullName());
 	}
 	
 	/** Attempts to logout the currently logged in user. */
@@ -194,15 +193,22 @@ public class TransactionsTrackerApp {
 		if (addedCorrectly) {
 			System.out.println("Added user.");
 		} else {
-			System.out.println("Failed to add user and default categories.");
-			System.out.println("Please try again later.");
+			System.out.println("Failed to add user, please try again later.");
 		}
 	}
 
-	/** Allows user to edit program preferences */
-	private void preferences() {
-		System.out.println("This option has not yet been implemented.");
-		System.out.println("Please pick a different option.");
+	/** 
+	 * Allows user to edit settings. 
+	 * @param input the scanner to read user input.
+	 */
+	private void settings(Scanner input) {
+		if (this.currentUser == null) {
+			// Must be logged in before editing settings.
+			System.out.println("Please log in before editing settings.");
+		} else {
+			// Go to settings.
+			Settings.run(this.db, input, this.currentUser);
+		}
 	}
 	
 	/**

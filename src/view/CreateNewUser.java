@@ -14,10 +14,10 @@ import model.User;
 class CreateNewUser {
 
 	// Constants regarding the restrictions from the SQLite database tables.
-	private static final int MAX_USERNAME_CHARS = 30;
-	private static final int MAX_FULLNAME_CHARS = 50;
-	private static final int MAX_PASSWORD_CHARS = 30;
-	private static final int MIN_PASSWORD_CHARS = 8;
+	protected static final int MAX_USERNAME_CHARS = 30;
+	protected static final int MAX_FULLNAME_CHARS = 50;
+	protected static final int MAX_PASSWORD_CHARS = 30;
+	protected static final int MIN_PASSWORD_CHARS = 8;
 	
 	// Starting balance of all new users
 	private static final double STARTING_BALANCE = 0.0;
@@ -129,7 +129,7 @@ class CreateNewUser {
 			
 			// Check if password is less than the maximum amount of characters long.
 			} else if (password.length() > MAX_PASSWORD_CHARS) {
-				System.out.println("Passwords must be less than " + MIN_PASSWORD_CHARS 
+				System.out.println("Passwords must be less than " + MAX_PASSWORD_CHARS 
 						+ " characters long.");
 				continue;
 			}

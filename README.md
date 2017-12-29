@@ -5,6 +5,15 @@ This program, using SQLite, stores information about each user, their transactio
 
 PATCH NOTES
 
+v 1.3.11 Changed the way transaction information is printed when asking the user if the transaction
+	info is correct. (12/29/17)
+
+v 1.3.10 Added option for users to edit various settings such as their full name, password, and
+	transaction categories. (12/28/18)
+	
+v 1.3.06 Added all files onto github and can now use verion control for managing this project.
+	(12/27/2018)
+
 v 1.3.05 Edited all method headers and comments to ensure clarity for both future implementors and
 	clients. (12/26/17)
 
