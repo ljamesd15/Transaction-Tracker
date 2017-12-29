@@ -15,8 +15,7 @@ import model.User;
 public class TransactionsTrackerApp {
 	
 	// An array of strings containing the default user expense categories.
-	private final String[] defaultCategories = new String[]
-			{"Deposit", "Food", "Housing", "Transportation", "Misc."};
+	private final String[] defaultCategories = Settings.DEFAULT_CATEGORIES;
 	
 	// The Transaction Tracker database.
 	private final TransactionsDB db;
@@ -87,8 +86,8 @@ public class TransactionsTrackerApp {
 		    		break;
 		    		
 		    	case "3":
-		    		// Preferences
-		    		this.preferences();
+		    		// Settings
+		    		this.settings(input);
 		    		break;
 		    	
 		    	case "4":
@@ -138,7 +137,7 @@ public class TransactionsTrackerApp {
 		}
 		
 		System.out.println("'2' to create a new user.");
-		System.out.println("'3' for program preferences.");
+		System.out.println("'3' for settings.");
 		System.out.println("'4' to enter a new expense.");
 		System.out.println("'5' to display your transaction history.");
 		System.out.println("'exit' to leave.");
@@ -171,7 +170,7 @@ public class TransactionsTrackerApp {
 		}
 		
 		this.currentUser = loggedInUser;
-		System.out.println("Hello " + this.currentUser.getName());
+		System.out.println("Hello " + this.currentUser.getFullName());
 	}
 	
 	/** Attempts to logout the currently logged in user. */
@@ -194,15 +193,23 @@ public class TransactionsTrackerApp {
 		if (addedCorrectly) {
 			System.out.println("Added user.");
 		} else {
-			System.out.println("Failed to add user and default categories.");
-			System.out.println("Please try again later.");
+			System.out.println("Failed to add user, please try again later.");
 		}
 	}
 
-	/** Allows user to edit program preferences */
-	private void preferences() {
-		System.out.println("This option has not yet been implemented.");
-		System.out.println("Please pick a different option.");
+	/** 
+	 * Allows user to edit settings. 
+	 * @param input the scanner to read user input.
+	 */
+	private void settings(Scanner input) {
+		// Must be logged in before editing settings.
+		if (this.currentUser == null) {
+			System.out.println("Please log in before editing settings.");
+			this.login(input);
+		}
+		
+		// Go to settings.
+		Settings.run(this.db, input, this.currentUser);
 	}
 	
 	/**

@@ -130,7 +130,7 @@ public class TransactionsDB {
 			
 			// Add in parameter info.
 			addUser.setString(1, newUser.getUsername());
-			addUser.setString(2, newUser.getName());
+			addUser.setString(2, newUser.getFullName());
 			addUser.setFloat(3, (float) 0.00);
 			addUser.setString(4, newUser.getPassword());
 			
@@ -304,6 +304,122 @@ public class TransactionsDB {
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			return null;
+		}
+	}
+	
+	/**
+	 * Changes the full name of a user in the database.
+	 * @param user is the object which contains the same user name and the new full name of the
+	 * 		user whose full name will be changed.
+	 * @return True if the update was successfully executed.
+	 */
+	public boolean changeFullName(User user) {
+		// Initialize query and statement.
+		PreparedStatement update;
+		String sqlStmt = "UPDATE Users SET name = ? WHERE username = ?";
+		
+		try {
+			// Clear the parameters of the query.
+			update = this.conn.prepareStatement(sqlStmt);
+			update.clearParameters();
+			
+			// Set parameters
+			update.setString(1, user.getFullName());
+			update.setString(2, user.getUsername());
+			
+			// Execute update
+			update.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
+	
+	/**
+	 * Changes the password of a user in the database.
+	 * @param user is the object which contains the same user name and the new password of the 
+	 * 		user whose password will be changed.
+	 * @return True if the update was successfully executed.
+	 */
+	public boolean changePassword(User user) {
+		// Initialize query and statement.
+		PreparedStatement update;
+		String sqlStmt = "UPDATE Users SET password = ? WHERE username = ?";
+		
+		try {
+			// Clear the parameters of the query.
+			update = this.conn.prepareStatement(sqlStmt);
+			update.clearParameters();
+			
+			// Set parameters
+			update.setString(1, user.getPassword());
+			update.setString(2, user.getUsername());
+			
+			// Execute update
+			update.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
+	
+	/**
+	 * Adds a new category to this DB.
+	 * @param category is the new category.
+	 * @return True if the category was successfully added.
+	 */
+	public boolean addCategory(String category) {
+		// Initialize query and SQL statement
+		PreparedStatement insert;
+		String sqlStmt = "INSERT INTO Categories VALUES(?)";
+		
+		try {
+			// Clear parameters
+			insert = this.conn.prepareStatement(sqlStmt);
+			insert.clearParameters();
+			
+			// Set parameter
+			insert.setString(1, category);
+			
+			// Execute insert
+			insert.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
+	
+	/**
+	 * Removes a category from this DB.
+	 * @param category the category name which will be removed.
+	 * @return True if the category was successfully removed.
+	 */
+	public boolean removeCategory(String category) {
+		// Initialize query and SQL statement
+		PreparedStatement remove;
+		String sqlStmt = "DELETE FROM Categories WHERE catName = ?";
+		
+		try {
+			// Clear parameters
+			remove = this.conn.prepareStatement(sqlStmt);
+			remove.clearParameters();
+			
+			// Set parameter
+			remove.setString(1, category);
+			
+			// Execute insert
+			remove.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			return false;
 		}
 	}
 }
