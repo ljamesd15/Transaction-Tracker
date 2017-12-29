@@ -413,23 +413,23 @@ class CreateNewTransaction {
 	 * @param transfer is the TransactionBuilder object whose information will be printed.
 	 */
 	public static void printTransInfo(TransactionBuilder transfer) {
-		System.out.print("Location: ");
+		System.out.print("Location:  ");
 		System.out.printf("%-20s", transfer.getDescription());
 		System.out.println();
 		
-		System.out.print("Amount: ");
+		System.out.print("Amount:    $");
 		System.out.printf("%+.2f", transfer.getAmount());
 		System.out.println();
 		
-		System.out.print("Date: ");
+		System.out.print("Date:      ");
 		System.out.printf("%-10s", transfer.getDate().toString());
 		System.out.println();
 		
-		System.out.print("Category: ");
+		System.out.print("Category:  ");
 		System.out.printf("%-20s", transfer.getCategory());
 		System.out.println();
 		
-		System.out.print("Memo: ");
+		System.out.print("Memo:      ");
 		System.out.printf("%-30s", transfer.getMemo());
 		System.out.println();
 	}
