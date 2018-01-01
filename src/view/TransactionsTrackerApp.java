@@ -98,7 +98,7 @@ public class TransactionsTrackerApp {
 		    		
 		    	case "5":
 		    		// Show transaction history
-		    		this.showTransactionHistory();
+		    		this.showTransactionHistory(input);
 		    		break;
 		    		
 		    	case "exit":
@@ -252,14 +252,16 @@ public class TransactionsTrackerApp {
 	}
 
 	
-	/** Allows the user to see their transaction history */
-	private void showTransactionHistory() {
+	/** 
+	 * Allows the user to see their transaction history.
+	 * @param input is the scanner used to read user input.
+	 */
+	private void showTransactionHistory(Scanner input) {
 		if (this.currentUser == null) {
 			System.out.println("You must be logged in for this feature.");
 			return;
 		}
-		System.out.println("This option has not yet been implemented.");
-		System.out.println("Please pick a different option.");
+		ShowHistory.run(db, input, this.currentUser);
 	}
 	
 	/** Exits the application */

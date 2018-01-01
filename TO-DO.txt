@@ -4,6 +4,8 @@ TO DO LIST:
 
 - Program options : show history
 
+- Show history display of pie chart and bar graph
+
 - Remember me option to store user info to prevent repeated log ins
 
 - Lock out a user after a number of incorrect attempts to log in
