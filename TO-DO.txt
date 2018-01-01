@@ -1,6 +1,6 @@
 TO DO LIST: 
 
-- add tests
+- add specification tests
 
 - Program options : show history
 

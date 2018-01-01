@@ -262,6 +262,20 @@ public class TransactionsDB {
     		return null;
     	}
     }
+    
+    /**
+     * Gets a set of transactions using given where and group by clauses along with a specific 
+     * 		user.
+     * @param whereClause is the where clause of the SQL statement.
+     * @param groupByClause is the group by clause of the SQL statement.
+     * @param user is the user whose transactions will be queried.
+     * @return A ResultSet resulting from a SQL statement using whereClause and groupByClause 
+     * 		when querying for transactions by user.
+     */
+    public ResultSet getTransactions(String whereClause, String groupByClause, User user) {
+    	PreparedStatement query;
+    	String sqlStmt = "SELECT sum(price_in_cents) AS sum, count(*) as cnt,";
+    }
 
     /**
      * Gets the categories which are available in this program.
@@ -304,6 +318,62 @@ public class TransactionsDB {
 		} catch (SQLException e) {
 			TransactionHelper.printErrorToLog(e);
 			return null;
+		}
+	}
+	
+	/**
+	 * Adds a new category to this DB.
+	 * @param category is the new category.
+	 * @return True if the category was successfully added.
+	 */
+	public boolean addCategory(String category) {
+		// Initialize query and SQL statement
+		PreparedStatement insert;
+		String sqlStmt = "INSERT INTO Categories VALUES(?)";
+		
+		try {
+			// Clear parameters
+			insert = this.conn.prepareStatement(sqlStmt);
+			insert.clearParameters();
+			
+			// Set parameter
+			insert.setString(1, category);
+			
+			// Execute insert
+			insert.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			TransactionHelper.printErrorToLog(e);
+			return false;
+		}
+	}
+	
+	/**
+	 * Removes a category from this DB.
+	 * @param category the category name which will be removed.
+	 * @return True if the category was successfully removed.
+	 */
+	public boolean removeCategory(String category) {
+		// Initialize query and SQL statement
+		PreparedStatement remove;
+		String sqlStmt = "DELETE FROM Categories WHERE catName = ?";
+		
+		try {
+			// Clear parameters
+			remove = this.conn.prepareStatement(sqlStmt);
+			remove.clearParameters();
+			
+			// Set parameter
+			remove.setString(1, category);
+			
+			// Execute insert
+			remove.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			TransactionHelper.printErrorToLog(e);
+			return false;
 		}
 	}
 	
@@ -359,62 +429,6 @@ public class TransactionsDB {
 			
 			// Execute update
 			update.execute();
-			return true;
-			
-		} catch (SQLException e) {
-			TransactionHelper.printErrorToLog(e);
-			return false;
-		}
-	}
-	
-	/**
-	 * Adds a new category to this DB.
-	 * @param category is the new category.
-	 * @return True if the category was successfully added.
-	 */
-	public boolean addCategory(String category) {
-		// Initialize query and SQL statement
-		PreparedStatement insert;
-		String sqlStmt = "INSERT INTO Categories VALUES(?)";
-		
-		try {
-			// Clear parameters
-			insert = this.conn.prepareStatement(sqlStmt);
-			insert.clearParameters();
-			
-			// Set parameter
-			insert.setString(1, category);
-			
-			// Execute insert
-			insert.execute();
-			return true;
-			
-		} catch (SQLException e) {
-			TransactionHelper.printErrorToLog(e);
-			return false;
-		}
-	}
-	
-	/**
-	 * Removes a category from this DB.
-	 * @param category the category name which will be removed.
-	 * @return True if the category was successfully removed.
-	 */
-	public boolean removeCategory(String category) {
-		// Initialize query and SQL statement
-		PreparedStatement remove;
-		String sqlStmt = "DELETE FROM Categories WHERE catName = ?";
-		
-		try {
-			// Clear parameters
-			remove = this.conn.prepareStatement(sqlStmt);
-			remove.clearParameters();
-			
-			// Set parameter
-			remove.setString(1, category);
-			
-			// Execute insert
-			remove.execute();
 			return true;
 			
 		} catch (SQLException e) {

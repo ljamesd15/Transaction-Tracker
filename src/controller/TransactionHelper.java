@@ -58,6 +58,10 @@ public class TransactionHelper {
 		}
     }
     
+    /**
+     * Prints an error to the log file.
+     * @param e is the exception.
+     */
     public static void printErrorToLog(Exception e) {
 		// Get the local date and time.
 		LocalDate currDate = LocalDate.now();
@@ -74,5 +78,30 @@ public class TransactionHelper {
 		// Alert user to error.
 		System.out.println("Something went wrong, please see log file at " + LOG_FILEPATH + ".");
     }
+    
+	
+	/**
+	 * Prints all categories in the following format
+	 * One category        -- category1
+	 * Two categories      -- category1 and category2
+	 * Multiple categories -- category1, category2, category3, ..., categoryN-1 and categoryN
+	 * without a new line character at the end.
+	 * @param categories the categories which will be printed.
+	 */
+	public static void printCategories(String[] categories) {
+		if (categories.length == 1) {
+			System.out.print(categories[0]);
+			
+		} else if (categories.length == 2) {
+			System.out.print(categories[0] + " and " + categories[1]);
+			
+		} else {
+			for (int i = 0; i < categories.length - 2; i++) {
+				System.out.print(categories[i] + ", ");
+			}
+			System.out.print(categories[categories.length - 2] + " and " 
+					+ categories[categories.length - 1]);
+		}
+	}
 }  
 

@@ -1,7 +1,9 @@
 package view;
 
+import java.sql.ResultSet;
 import java.util.Scanner;
 
+import controller.TransactionHelper;
 import controller.TransactionsDB;
 import model.User;
 
@@ -42,8 +44,20 @@ public class ShowHistory {
 		}
 		
 		// Query the database
+		ResultSet transactions = db.getTransactions(whereClause, groupByClause, user);
 		
 		// Display transactions
+		switch (displayType) {
+		
+			case DISPLAY_AS_LIST:
+				displayList(transactions);
+				
+			case DISPLAY_AS_PIE:
+				displayPieChart(transactions);
+				
+			case DISPLAY_AS_BAR:
+				displayBarGraph(transactions);
+		}
 	}
 
 	/**
@@ -78,11 +92,13 @@ public class ShowHistory {
 					
 				case "1":
 					// Pie chart
-					return DISPLAY_AS_PIE;
+					//return DISPLAY_AS_PIE;
+					System.out.println("This option has not yet been implemented.");
 					
 				case "2":
 					// Bar graph
-					return DISPLAY_AS_BAR;
+					//return DISPLAY_AS_BAR;
+					System.out.println("This option has not yet been implemented.");
 					
 				case "options":
 					// Show display options
@@ -104,8 +120,8 @@ public class ShowHistory {
 	private static void displayOptions() {
 		System.out.println("Options to display transaction history are...");
 		System.out.println("'0' to display transactions as a list.");
-		System.out.println("'1' to display transactions as a pie chart.");
-		System.out.println("'2' to display transactions as a bar graph.");
+		System.out.println("'1' to display transactions as a pie chart (not yet implemented).");
+		System.out.println("'2' to display transactions as a bar graph (not yet implemenetd).");
 		System.out.println("'options' to see the list of display options.");
 		System.out.println("'back' to go back to the main menu.");
 	}
@@ -184,8 +200,14 @@ public class ShowHistory {
 	}
 	
 	private static String refineByCategory(String[] categories, Scanner input) {
-		// TODO Auto-generated method stub
-		return null;
+		while (true) {
+			System.out.print('\n' + "Available categories are ");
+			TransactionHelper.printCategories(categories);
+			System.out.println(".");
+			
+			
+			
+		}
 	}
 
 	private static String refineByMonth(Scanner input) {
@@ -309,5 +331,29 @@ public class ShowHistory {
 	private static String breakDownByPrice(Scanner input) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	/**
+	 * Displays the transactions as a list.
+	 * @param transactions are the transactions which will be displayed in a list.
+	 */
+	private static void displayList(ResultSet transactions) {
+		
+	}
+	
+	/**
+	 * Displays the transactions as a pie chart.
+	 * @param transactions are the transactions which will be displayed in a pie chart.
+	 */
+	private static void displayPieChart(ResultSet transactions) {
+		
+	}
+	
+	/**
+	 * Displays the transactions as a bar graph.
+	 * @param transactions are the transactions which will be displayed in a bar graph.
+	 */
+	private static void displayBarGraph(ResultSet transactions) {
+		
 	}
 }
