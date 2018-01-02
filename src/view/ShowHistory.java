@@ -37,6 +37,7 @@ public class ShowHistory {
 		}
 		
 		// Ask user how they would like to break down the refined transactions.
+		String[] selectClause = new String[]
 		String groupByClause = breakdown(categories, input, displayType);
 		if (groupByClause == null) {
 			// User wants to return to the main menu.
