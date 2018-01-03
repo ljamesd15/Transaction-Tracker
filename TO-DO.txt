@@ -1,8 +1,13 @@
 TO DO LIST: 
 
-- add tests
+- Specification tests -- User (user name taken, user name/name/password too long, password too short)
+						 Transactions (location/memo too long, invalid number for category, not logged in)
+						 Main menu (invalid number, non-number input)
+						 Settings (not logged in, category name too long, category already exists)
 
 - Program options : show history
+
+- Edit when I need to send info to log file and when I can't just alert user through text
 
 - Remember me option to store user info to prevent repeated log ins
 
