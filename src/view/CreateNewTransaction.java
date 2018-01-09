@@ -12,7 +12,7 @@ import model.Transaction.TransactionBuilder;
  * objects from user information.
  * @author L. James Davidson
  */
-class CreateNewTransaction {
+abstract class CreateNewTransaction {
 
 	// Constants regarding the restrictions from the SQLite database tables.
 	private static final int MAX_DESCR_CHARS = 20;
