@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class TransactionHelper {
 
 	// File path to log file.
-	private static final String LOG_FILEPATH = "C:\\Users\\littl\\git\\Transaction-Tracker\\.log";
+	private static final String LOG_FILEPATH = "C:\\Users\\ljame\\git\\Transaction-Tracker\\.log";
 	
 	// Log file
 	private static File LOG = new File(LOG_FILEPATH);
