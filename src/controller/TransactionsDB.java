@@ -69,7 +69,7 @@ public class TransactionsDB {
     	try {
     		Class.forName("org.sqlite.JDBC");
 	        conn = DriverManager.getConnection(
-	        		 "jdbc:sqlite:/C:/sqlite/Transaction-Tracker.db");
+	        		 "jdbc:sqlite:/C:/sqlite/TT.db");
 	    } catch (Exception e) {
 	        TransactionHelper.printErrorToLog(e);
 	        System.exit(0);
@@ -149,14 +149,14 @@ public class TransactionsDB {
      * @returns A user object containing the information for the user which just logged in or 
      * 		null if login failed.
      */
-    public User logIn(String username, String password) {
+    public User logIn(String username) {
       
   	  // Create query and statement
   	  PreparedStatement logIn;
   	  String sqlStmt = 
   			  "SELECT *\n"
   			  + "FROM Users\n"
-  			  + "WHERE username = ? AND password = ?\n";
+  			  + "WHERE username = ?";
   	  
   	ResultSet results;
   	  try {
@@ -166,7 +166,6 @@ public class TransactionsDB {
   	  	  
   	  	  // Set the information in this statement
   	  	  logIn.setString(1, username);
-  	  	  logIn.setString(2, password);
   	  	  
   	  	  // Execute the query
   	  	  results = logIn.executeQuery();
@@ -309,11 +308,11 @@ public class TransactionsDB {
 	
 	/**
 	 * Changes the full name of a user in the database.
-	 * @param user is the object which contains the same user name and the new full name of the
-	 * 		user whose full name will be changed.
+	 * @param user is the user whose name will be changed.
+	 * @param newName is the new full name of the user.
 	 * @return True if the update was successfully executed.
 	 */
-	public boolean changeFullName(User user) {
+	public boolean changeFullName(User user, String newName) {
 		// Initialize query and statement.
 		PreparedStatement update;
 		String sqlStmt = "UPDATE Users SET name = ? WHERE username = ?";
@@ -324,7 +323,7 @@ public class TransactionsDB {
 			update.clearParameters();
 			
 			// Set parameters
-			update.setString(1, user.getFullName());
+			update.setString(1, newName);
 			update.setString(2, user.getUsername());
 			
 			// Execute update
@@ -339,11 +338,11 @@ public class TransactionsDB {
 	
 	/**
 	 * Changes the password of a user in the database.
-	 * @param user is the object which contains the same user name and the new password of the 
-	 * 		user whose password will be changed.
+	 * @param user is the user whose password will be updated.
+	 * @param newPassword is the new password for this user.
 	 * @return True if the update was successfully executed.
 	 */
-	public boolean changePassword(User user) {
+	public boolean changePassword(User user, String newPassword) {
 		// Initialize query and statement.
 		PreparedStatement update;
 		String sqlStmt = "UPDATE Users SET password = ? WHERE username = ?";
@@ -354,7 +353,7 @@ public class TransactionsDB {
 			update.clearParameters();
 			
 			// Set parameters
-			update.setString(1, user.getPassword());
+			update.setString(1, newPassword);
 			update.setString(2, user.getUsername());
 			
 			// Execute update

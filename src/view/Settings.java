@@ -3,15 +3,13 @@ package view;
 import java.util.Scanner;
 
 import controller.TransactionsDB;
+import model.BCrypt;
 import model.User;
 
 class Settings {
 
 	// Constants regarding the restrictions from the SQLite database tables.
 	private static final int MAX_CATNAME_CHARS = 30;
-	private static final int MAX_FULLNAME_CHARS = CreateNewUser.MAX_FULLNAME_CHARS;
-	private static final int MAX_PASSWORD_CHARS = CreateNewUser.MAX_PASSWORD_CHARS;
-	private static final int MIN_PASSWORD_CHARS = CreateNewUser.MIN_PASSWORD_CHARS;
 	
 	// An array of strings containing the default user expense categories.
 	protected static final String[] DEFAULT_CATEGORIES = new String[]
@@ -352,29 +350,28 @@ class Settings {
 		
 		while (true) {
 			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
-			String oldPassword = input.nextLine();
-			System.out.print("Please enter your new full name" + '\n' + "> ");
-			String newFullName = input.nextLine();
+			String password = input.nextLine();
 			
 			// Check if user typed old password matches the old password.
-			if (!user.getPassword().equals(oldPassword)) {
+			if (!BCrypt.checkpw(password, user.getPassword())) {
 				System.out.println("Incorrect password.");
-					
-			// Check if the name is less than the maximum number of characters allowed.
-			} else if (newFullName.length() > MAX_FULLNAME_CHARS) {
-				System.out.println("Names must be less than " + MAX_FULLNAME_CHARS 
-						+ " characters long.");
-				
+						
 			} else {
+				// Get new full name
+				String newName = UserInformation.setFullName(input);
+				
 				// Have DB change the user's full name
-				String oldName = user.getFullName();
-				user.setUserFullName(newFullName);
-				boolean executed = db.changeFullName(user);
+				boolean executed = db.changeFullName(user, newName);
 				
 				// Inform user of output.
 				if (executed) {
-					System.out.println("Full name changed from '" + oldName + "' to '"
-							+ newFullName + "'.");
+					System.out.println("Full name changed from '" + user.getFullName() + "' to '"
+							+ newName + "'.");
+					
+					// Only set the user object's full name to newName once the execution was 
+					// successfully completed.
+					user.setUserFullName(newName);
+					
 				} else {
 					System.out.println("Unable to change full name, please try again later.");
 				}
@@ -394,32 +391,27 @@ class Settings {
 		
 		while (true) {
 			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
-			String oldPassword = input.nextLine();
-			System.out.print("Please enter your new password" + '\n' + "> ");
-			String newPassword = input.nextLine();
+			String password = input.nextLine();
 			
 			// Check if user typed old password matches the old password.
-			if (!user.getPassword().equals(oldPassword)) {
+			if (!BCrypt.checkpw(password, user.getPassword())) {
 				System.out.println("Incorrect password.");
 				
-			// Check if password is at least a minimum amount of characters long.
-			} else if (newPassword.length() < MIN_PASSWORD_CHARS) {
-					System.out.println("Passwords must be at least " + MIN_PASSWORD_CHARS 
-							+ " characters long.");
-				
-			// Check if password is less than the maximum amount of characters long.
-			} else if (newPassword.length() > MAX_PASSWORD_CHARS) {
-				System.out.println("Passwords must be less than " + MAX_PASSWORD_CHARS 
-						+ " characters long.");
-				
 			} else {
-				// Have DB change the user password
-				user.setPassword(newPassword);
-				boolean executed = db.changePassword(user);
+				// Get new password
+				String newPassword = UserInformation.setPassword(input);
+				
+				// Have DB change the user password		
+				boolean executed = db.changePassword(user, newPassword);
 				
 				// Inform user of output.
 				if (executed) {
 					System.out.println("Password successfully changed.");
+					
+					// Only set the logged in user's password to the new password if the update 
+					// was executed successfully.
+					user.setPassword(newPassword);
+					
 				} else {
 					System.out.println("Unable to change password, please try again later.");
 				}

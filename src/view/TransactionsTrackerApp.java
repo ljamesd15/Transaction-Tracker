@@ -7,6 +7,7 @@ import controller.TransactionHelper;
 import controller.TransactionsDB;
 import model.Transaction;
 import model.User;
+import model.BCrypt;
 
 /**
  * Text based interface for clients to query and update the database in order to log in, add 
@@ -157,20 +158,31 @@ public class TransactionsTrackerApp {
 		String password = input.nextLine();
 		
 		System.out.println("Logging in...");
-		User loggedInUser = this.db.logIn(username, password);
+		User dbUser = this.db.logIn(username);
+		boolean correctPass = false;
 		
-		while (loggedInUser == null) {
-			System.out.println("Invalid username or password.");
+		while (!correctPass) {
+			// If the user name did not exist in this db then the dbUser will be null
+			if (dbUser != null) {
+				correctPass = BCrypt.checkpw(password, dbUser.getPassword());
+			}
 			
-			System.out.print('\n' + "Username: ");
-			username = input.nextLine();
-			System.out.print("Password: ");
-			password = input.nextLine();
-			
-			loggedInUser = this.db.logIn(username, password);
+			// correctPass is initialized to false. The only way to change this is to have dbUser 
+			// be non-null (which means the user typed in a valid user name) AND the user entered 
+			// password to match the dbUser's password.
+			if (!correctPass) {
+				System.out.println("Invalid username or password.");
+				
+				System.out.print('\n' + "Username: ");
+				username = input.nextLine();
+				System.out.print("Password: ");
+				password = input.nextLine();
+				
+				dbUser = this.db.logIn(username);
+			}
 		}
 		
-		this.currentUser = loggedInUser;
+		this.currentUser = dbUser;
 		System.out.println("Hello " + this.currentUser.getFullName());
 	}
 	
@@ -188,7 +200,7 @@ public class TransactionsTrackerApp {
 	 */
 	private void createUser(Scanner input) {
 		System.out.println("Creating new user...");
-		User newUser = CreateNewUser.run(input, this.db);
+		User newUser = UserInformation.run(input, this.db);
 		boolean addedCorrectly = this.db.addNewUser(newUser);
 		
 		if (addedCorrectly) {
