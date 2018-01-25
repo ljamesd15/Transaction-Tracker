@@ -11,9 +11,7 @@ TO DO LIST:
 
 - Lock out a user after a number of incorrect attempts to log in
 
-- Encrypt password storage
-
-- make the adding a transaction a DB transaction where I can rollback if need be.
+- make the adding a transaction a DB transaction where I can roll back if need be.
 	
 - If SQLite DB is locked hold transaction information and add it when available.
 
