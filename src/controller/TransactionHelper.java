@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class TransactionHelper {
 
 	// File path to log file.
-	private static final String LOG_FILEPATH = "C:\\Users\\littl\\git\\Transaction-Tracker\\.log";
+	private static final String LOG_FILEPATH = (new File("")).getAbsolutePath() + "\\.log";
 	
 	// Log file
 	private static File LOG = new File(LOG_FILEPATH);
@@ -32,7 +32,6 @@ public class TransactionHelper {
 			System.out.println("Could not set up connection to log file.");
 			System.exit(0);
 		}
-		
 	}
 	
     /**
