@@ -67,9 +67,10 @@ public class TransactionsDB {
     /** Opens a connection with the TransactionsTracker database **/
     public void open() {
     	try {
-    		Class.forName("org.sqlite.JDBC");
+    		Class.forName("org.sqlite.JDBC");  
+    		
 	        conn = DriverManager.getConnection(
-	        		 "jdbc:sqlite:/C:/sqlite/TT.db");
+	        		 "jdbc:sqlite:" + TransactionHelper.FILEPATH + "\\data\\TT.db");
 	    } catch (Exception e) {
 	        TransactionHelper.printErrorToLog(e);
 	        System.exit(0);

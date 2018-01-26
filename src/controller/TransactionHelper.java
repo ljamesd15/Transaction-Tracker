@@ -15,11 +15,11 @@ import java.util.Scanner;
  */
 public class TransactionHelper {
 
-	// File path to log file.
-	private static final String LOG_FILEPATH = (new File("")).getAbsolutePath() + "\\.log";
+	// File path to this folder
+	protected static final String FILEPATH = (new File("")).getAbsolutePath();
 	
 	// Log file
-	private static File LOG = new File(LOG_FILEPATH);
+	private static File LOG = new File(FILEPATH + "\\.log");
 	
 	// Log file writer
 	private static PrintWriter pw;
@@ -71,7 +71,7 @@ public class TransactionHelper {
 		pw.close();
 		
 		// Alert user to error.
-		System.out.println("Something went wrong, please see log file at " + LOG_FILEPATH + ".");
+		System.out.println("Something went wrong, please see log file at " + FILEPATH + "\\.log.");
     }
 }  
 
