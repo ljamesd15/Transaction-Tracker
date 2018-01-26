@@ -1,14 +1,22 @@
 # Transactions-Tracker
 An independent side project where users can monitor their both incoming and outgoing expenses.
 	
-This program, using SQLite, safely stores user information, their transactions, and program preferences. With a text user interface a user can log into an account (and log out), check their current balance, add new transactions, look at their transaction history (soon), and edit settings, both user and program. Users can use Transactions Tracker to monitor their expenses and see how much they are spending in certain categories, at certain locations, and much much more. Transactions Tracker allows users to become more fiscally responsible and aware of where money is both coming in from and more importantly where it is going to.
+This program, using SQLite, safely stores user information, their transactions, and program 
+preferences. With a text user interface a user can log into an account (and log out), check their 
+current balance, add new transactions, look at their transaction history (soon), and edit settings, 
+both user and program. Users can use Transactions Tracker to monitor their expenses and see how 
+much they are spending in certain categories, at certain locations, and much much more. 
+Transactions Tracker allows users to become more fiscally responsible and aware of where money is 
+both coming in from and more importantly where it is going to.
 
 PATCH NOTES
 
-v 1.3.20 Now stores encrypted passwords in database using BCrypt. (1/25/18)
+v 1.3.20 Now stores encrypted passwords in database using BCrypt. Terminates session if there are 
+	too many incorrect log in attempts.(1/25/18)
 
 v 1.3.11 Changed the way transaction information is printed when asking the user if the transaction
-	info is correct. Fixed precision rounding errors. Errors messages will now be printed to a log file. 	(12/29/17)
+	info is correct. Fixed precision rounding errors. Errors messages will now be printed to a log 
+	file. (12/29/17)
 
 v 1.3.10 Added option for users to edit various settings such as their full name, password, and
 	transaction categories. (12/28/18)

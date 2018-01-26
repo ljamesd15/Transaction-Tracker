@@ -19,6 +19,9 @@ public class TransactionsTrackerApp {
 	// An array of strings containing the default user expense categories.
 	private final String[] defaultCategories = Settings.DEFAULT_CATEGORIES;
 	
+	// Max number of incorrect password attempts.
+	private final int MIN_INCORRECT_LOGIN_ATTEMPTS = 3;
+	
 	// The Transaction Tracker database.
 	private final TransactionsDB db;
 	
@@ -150,37 +153,48 @@ public class TransactionsTrackerApp {
 	 * @param input is the scanner used to read user input.
 	 */
 	private void login(Scanner input) {
+		
+		// Initialize variables
+		String username;
+		String password;
+		User dbUser;
+		int incorrectAttempts = 0;
 
-		// Get user name and password from the user.
-		System.out.print('\n' + "Username: ");
-		String username = input.nextLine();
-		System.out.print("Password: ");
-		String password = input.nextLine();
-		
-		System.out.println("Logging in...");
-		User dbUser = this.db.logIn(username);
-		boolean correctPass = false;
-		
-		while (!correctPass) {
-			// If the user name did not exist in this db then the dbUser will be null
-			if (dbUser != null) {
-				correctPass = BCrypt.checkpw(password, dbUser.getPassword());
+		do {
+			// Get user name and password from the user.
+			System.out.print('\n' + "Username: ");
+			username = input.nextLine();
+			System.out.print("Password: ");
+			password = input.nextLine();
+			
+			System.out.println("Logging in...");
+			dbUser = this.db.logIn(username);
+			
+			// Check if user name is valid (non-null dbUser) and if password is correct for 
+			// user name.
+			if (dbUser != null && BCrypt.checkpw(password, dbUser.getPassword())) {
+				break;
 			}
 			
-			// correctPass is initialized to false. The only way to change this is to have dbUser 
-			// be non-null (which means the user typed in a valid user name) AND the user entered 
-			// password to match the dbUser's password.
-			if (!correctPass) {
-				System.out.println("Invalid username or password.");
-				
-				System.out.print('\n' + "Username: ");
-				username = input.nextLine();
-				System.out.print("Password: ");
-				password = input.nextLine();
-				
-				dbUser = this.db.logIn(username);
+			incorrectAttempts++;
+			
+			// If there has been MIN_INCORRECT_LOGIN_ATTEMPTS then exit program.
+			if (incorrectAttempts == MIN_INCORRECT_LOGIN_ATTEMPTS) {
+				System.out.println("You have entered too many incorrect log-in attempts.");
+				System.out.println("Please try again later.");
+				try {
+					this.db.close();
+				} catch (SQLException e) {
+					// Print error to log file.
+					TransactionHelper.printErrorToLog(e);
+				}
+				System.exit(1);
 			}
-		}
+			
+			// Alert user of invalid log in information
+			System.out.println("Invalid username or password.");
+			
+		} while(true);
 		
 		this.currentUser = dbUser;
 		System.out.println("Hello " + this.currentUser.getFullName());
