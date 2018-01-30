@@ -1,5 +1,5 @@
 # Transactions-Tracker
-An independent side project where users can monitor their both incoming and outgoing expenses.
+An independent side project where users can monitor their both incoming and outgoing transactions.
 	
 This program, using SQLite, stores user information, user transactions, user preferences, and 
 program preferences. The database securely stores user password with BCrypt and more information
@@ -12,6 +12,8 @@ more fiscally responsible and aware of where money is both coming in from and mo
 where it is going to.
 
 PATCH NOTES
+
+v 1.3.21 Default categories for new databases have been reduced to only "N/A". (1/30/18)
 
 v 1.3.20 Now stores encrypted passwords in database using BCrypt. Terminates session if there are 
 	too many incorrect log in attempts. The database file was added to git so now all users can use 
