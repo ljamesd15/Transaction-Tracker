@@ -16,9 +16,6 @@ import model.BCrypt;
  */
 public class TransactionsTrackerApp {
 	
-	// An array of strings containing the default user expense categories.
-	private final String[] defaultCategories = Settings.DEFAULT_CATEGORIES;
-	
 	// Max number of incorrect password attempts.
 	private final int MIN_INCORRECT_LOGIN_ATTEMPTS = 3;
 	
@@ -253,28 +250,50 @@ public class TransactionsTrackerApp {
 
 		// If categories are null set them to the default categories and alert user.
 		if (categories == null) {
-			System.out.println("Cannot get all avaliable categories at this time.");
-			System.out.println("Default categories will only be avaliable.");
-			categories = this.defaultCategories;
+			System.out.println("Cannot get avaliable categories at this time.");
+			System.out.println("Please try again later.");
+			return;
 		}
 		
 		// Make a Transaction object.
 		Transaction trans = CreateNewTransaction.run(input, categories);
 		
-		// Add transaction to database
-		Double balance = this.db.addExpense(trans, this.currentUser.getUsername());
-		
-		if (balance == null) {
-			System.out.println("Unable to add transaction and update balance. "
-					+ "Please try again later.");
+
+		try {
+			// Begin the transaction
+			this.db.beginTransaction();
+			
+			// Add transaction to database
+			this.db.addExpense(trans, this.currentUser.getUsername());
+			
+			// Change the user's balance by the amount of the transaction. 
+			double newBal = this.db.updateBalance(this.currentUser.getUsername(), 
+					trans.getAmountInCents());
+			
+			// Commit the transaction
+			this.db.commitTransaction();
+			
+			// Set the logged in user objects' new balance.
+			this.currentUser.setUserBalance(newBal / 100.0);
+			// We are dividing by 100 because the balances are stored in cents on the database.
+			
+			// Print new balance
+			System.out.println("Your current balance is $" + this.currentUser.getUserBalance());
+			
+		} catch (SQLException e) {
+			
+			// Roll back the transaction
+			try {
+				this.db.rollbackTransaction();
+				
+			} catch (SQLException e1) {
+				TransactionHelper.printErrorToLog(e1);
+			}
+			
+			TransactionHelper.printErrorToLog(e);
+			System.out.println("Error adding transaction. Please see the log file.");
 			return;
 		}
-		
-		// Set the logged in user objects' new balance.
-		this.currentUser.setUserBalance(balance);
-		
-		// Print new balance
-		System.out.println("Your current balance is $" + balance.doubleValue());
 	}
 
 	

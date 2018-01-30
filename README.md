@@ -13,7 +13,8 @@ where it is going to.
 
 PATCH NOTES
 
-v 1.3.21 Default categories for new databases have been reduced to only "N/A". (1/30/18)
+v 1.3.21 Default categories for new databases have been reduced to only "N/A". Made database
+	transactions follow ACID properties with commits and roll backs. (1/30/18)
 
 v 1.3.20 Now stores encrypted passwords in database using BCrypt. Terminates session if there are 
 	too many incorrect log in attempts. The database file was added to git so now all users can use 

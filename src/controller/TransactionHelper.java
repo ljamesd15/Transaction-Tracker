@@ -30,7 +30,7 @@ public class TransactionHelper {
 			pw = new PrintWriter(new FileWriter(LOG, true), true);
 		} catch (IOException e) {
 			System.out.println("Could not set up connection to log file.");
-			System.exit(0);
+			System.exit(1);
 		}
 	}
 	

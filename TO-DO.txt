@@ -7,11 +7,7 @@ TO DO LIST:
 
 - Program options : show history
 
-- Edit when I need to send info to log file and when I can't just alert user through text
-
 - Encrypt user balance
-
-- make the adding a transaction a DB transaction where I can roll back if need be.
 	
 - If SQLite DB is locked hold transaction information and add it when available.
 

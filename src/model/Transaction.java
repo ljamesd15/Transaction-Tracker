@@ -13,6 +13,7 @@ public class Transaction {
 	private final LocalDate date;
 	private final String category;
 	private final String memo;
+	private final boolean isDeposit;
 	
 	// AF: 
 	// The description of the transaction must be non-null. 
@@ -20,7 +21,7 @@ public class Transaction {
 	// The category of this must be non-null.
 	// The memo of the transaction must be non-null.
 	
-	// RI: location != null, date != null, category != null, memo != null,
+	// RI: location != null, date != null, category != null, memo != null
 	
 	/**
 	 * Creates a new immutable transaction object using the builder object.
@@ -33,6 +34,7 @@ public class Transaction {
 		this.date = builder.date;
 		this.category = builder.category;
 		this.memo = builder.memo;
+		this.isDeposit = builder.isDeposit;
 		
 		// Make sure the representation invariant is satisfied.
 		this.checkRep();
@@ -73,6 +75,13 @@ public class Transaction {
 		return this.memo;
 	}
 	
+	/**
+	 * @return True if this transaction is a deposit.
+	 */
+	public boolean isADeposit() {
+		return this.isDeposit;
+	}
+	
 	
 	/**
 	 * A builder object for Transaction.
@@ -85,13 +94,16 @@ public class Transaction {
 		private String category;
 		private String memo;
 		private LocalDate date;
+		private boolean isDeposit;
 		
 		/**
 		 * Creates a TransactionBuilder object which can be slowly fleshed out until all 
 		 * information has been filled in. Once enough information has been filled in then a
 		 * Transaction object may be built.
+		 * @param isDeposit determines if this transaction is a deposit.
 		 */
-		public TransactionBuilder() {
+		public TransactionBuilder(boolean isDeposit) {
+			this.isDeposit = isDeposit;
 		}
 		
 		/**
@@ -116,14 +128,13 @@ public class Transaction {
 		}
 		
 		/**
-		 * Sets the amount of the this transaction. If this transaction's category is a deposit
+		 * Sets the amount of the this transaction. If this transaction's type is a deposit
 		 * then the amount will be made positive and otherwise will be made negative.
 		 * @param amount is the amount that was transfered during this transaction in cents.
 		 */
 		public void setAmountInCents(int amount) {
-			// If this transaction is explicitly said to be a deposit then make amount positive,
-			// otherwise change amount to be negative.
-			if (this.category != null && this.category.equals("Deposit")) {
+			// If this transaction is a deposit set the amount to positive.
+			if (this.isDeposit) {
 				this.amount_in_cents = Math.abs(amount);
 			} else {
 				this.amount_in_cents = -1 * Math.abs(amount);
@@ -202,6 +213,21 @@ public class Transaction {
 		 */
 		public String getMemo() {
 			return this.memo;
+		}
+		
+		/**
+		 * Sets the transaction type to the given parameter.
+		 * @param isDeposit determines is this transaction is a deposit.
+		 */
+		public void setAsDeposit(boolean isDeposit) {
+			this.isDeposit = isDeposit;
+		}
+		
+		/**
+		 * @return True if this transaction is a deposit.
+		 */
+		public boolean isADeposit() {
+			return this.isDeposit;
 		}
 		
 		/**
