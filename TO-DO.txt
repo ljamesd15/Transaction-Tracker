@@ -1,21 +1,14 @@
 TO DO LIST: 
 
-- add tests
+- Specification tests -- User (user name taken, user name/name/password too long, password too short)
+						 Transactions (location/memo too long, invalid number for category, not logged in)
+						 Main menu (invalid number, non-number input)
+						 Settings (not logged in, category name too long, category already exists)
 
-- add switch statements
+- Program options : show history (non-graphic, no charts just text based)
 
-- ability to go back at any point
+- Encrypt user balance
+	
+- If SQLite DB is locked hold transaction information and add it when available.
 
-- add this to a read me file
-
-- Program options : preferences, show history
-
-- Lock out a user after a number of incorrect attempts 
-	to log in
-
-- Encrypt password storage
-
-- make the adding a transaction a DB transaction where 
-	I can rollback if need be.
-
-- GUI
+- GUI (ability to go back at any point, remember me option to store user info to prevent repeated log ins)

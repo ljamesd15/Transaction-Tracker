@@ -22,19 +22,32 @@ public class TransactionsDB {
 	private PreparedStatement beginTxnStmt;
 	private PreparedStatement commitTxnStmt;
 	private PreparedStatement abortTxnStmt;
-
-	/** Initializes the 3 DB transactions statements. 
-	 *  @throws SQLException if a database access error occurs or the database connection 
-	 *  	is closed.
-	 */
-	public void prepare() throws SQLException {
-	    beginTxnStmt = conn.prepareStatement(
-	        "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE; BEGIN TRANSACTION;");
-	    commitTxnStmt = conn.prepareStatement("COMMIT TRANSACTION");
-	    abortTxnStmt = conn.prepareStatement("ROLLBACK TRANSACTION");
-	  }
-  
-	/** 
+    
+    /** Opens a connection with the TransactionsTracker database **/
+    public void open() {
+        try {
+        	Class.forName("org.sqlite.JDBC");
+			conn = DriverManager.getConnection(
+					 "jdbc:sqlite:" + TransactionHelper.FILEPATH + "\\data\\TT.db");
+			
+			// Set up the transaction start, commit, and roll back statements
+		    beginTxnStmt = this.conn.prepareStatement("BEGIN TRANSACTION;");
+		    commitTxnStmt = this.conn.prepareStatement("COMMIT");
+		    abortTxnStmt = this.conn.prepareStatement("ROLLBACK;");
+		    
+		} catch (SQLException | ClassNotFoundException e) {
+			TransactionHelper.printErrorToLog(e);
+			System.out.println("Error establishing connection, please see log file.");
+			System.exit(1);
+		}
+    }
+    
+    /** Closes the connection to the database. */
+    public void close() throws SQLException {
+      conn.close();
+    }
+    
+    /** 
 	 * Begins a new transaction which will only be committed when explicitly requested.
 	 *  @throws SQLException if a database access error occurs, the database connection is closed,
 	 *  	or the beginTxnStmt is closed.
@@ -64,24 +77,6 @@ public class TransactionsDB {
         conn.setAutoCommit(true);  // go back to one transaction per statement
   	}
     
-    /** Opens a connection with the TransactionsTracker database **/
-    public void open() {
-    	try {
-    		Class.forName("org.sqlite.JDBC");
-	        conn = DriverManager.getConnection(
-	        		 "jdbc:sqlite:/C:/sqlite/Transaction-Tracker.db");
-	    } catch ( Exception e ) {
-	        System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-	        System.exit(0);
-	    }
-    }
-    
-    /** Closes the connection to the database. */
-    public void close() throws SQLException {
-      conn.close();
-      conn = null;
-    }
-    
     /**
      * Checks to see if a user name is already taken.
      * @param username is the user name being checked.
@@ -104,15 +99,10 @@ public class TransactionsDB {
 			ResultSet users = check.executeQuery();
 			
 			// If there are no values in the result set then this user name is not taken.
-			if (!users.next()) {
-				return false;
-			} else {
-				return true;
-			}
+			return users.next();
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-			System.out.println("Please try again later.");
+			TransactionHelper.printErrorToLog(e);
 			return true;
 		}
 	}
@@ -134,7 +124,7 @@ public class TransactionsDB {
 			
 			// Add in parameter info.
 			addUser.setString(1, newUser.getUsername());
-			addUser.setString(2, newUser.getName());
+			addUser.setString(2, newUser.getFullName());
 			addUser.setFloat(3, (float) 0.00);
 			addUser.setString(4, newUser.getPassword());
 			
@@ -154,14 +144,14 @@ public class TransactionsDB {
      * @returns A user object containing the information for the user which just logged in or 
      * 		null if login failed.
      */
-    public User logIn(String username, String password) {
+    public User logIn(String username) {
       
   	  // Create query and statement
   	  PreparedStatement logIn;
   	  String sqlStmt = 
   			  "SELECT *\n"
   			  + "FROM Users\n"
-  			  + "WHERE username = ? AND password = ?\n";
+  			  + "WHERE username = ?";
   	  
   	ResultSet results;
   	  try {
@@ -171,7 +161,6 @@ public class TransactionsDB {
   	  	  
   	  	  // Set the information in this statement
   	  	  logIn.setString(1, username);
-  	  	  logIn.setString(2, password);
   	  	  
   	  	  // Execute the query
   	  	  results = logIn.executeQuery();
@@ -182,10 +171,10 @@ public class TransactionsDB {
   	  	  }
   	  	  
   	  	  return new User(results.getString("username"), results.getString("name"), 
-  	  			  (double) results.getFloat("balance"), results.getString("password"));
+  	  			  results.getInt("balance_in_cents") / 100.0, results.getString("password"));
   	  	  
   	  } catch (SQLException e) {
-  		  System.out.println(e.getMessage());
+  		  TransactionHelper.printErrorToLog(e);
   		  return null;
   	  }
     }
@@ -194,77 +183,64 @@ public class TransactionsDB {
      * Adds an expense to a specified user.
      * @param expense is the transaction to be added to the database.
      * @param username is the user who the transaction will be added to.
-     * @return The new account balance of the user or null if an exception occurred.
+     * @throws SQLException if there was an error when adding the transaction to the database.
      */
-    public Double addExpense(Transaction expense, String username) {
+    public void addExpense(Transaction expense, String username) throws SQLException {    	
     	// Initialize query and statement.
     	PreparedStatement insert;
     	String sqlStmt = "INSERT INTO Transactions VALUES (?, ?, ?, ? , ?, ?)";
+    	      	
+    	// Clear parameters
+    	insert = this.conn.prepareStatement(sqlStmt);
+    	insert.clearParameters();
     	
-    	try {        	
-        	// Clear parameters
-        	insert = this.conn.prepareStatement(sqlStmt);
-        	insert.clearParameters();
-        	
-        	// Insert parameters from Transaction object.
-        	insert.setString(1, expense.getDescription());
-        	insert.setFloat(2, (float)expense.getAmount());
-        	insert.setString(3, expense.getDate().toString());
-        	insert.setString(4, expense.getMemo());
-        	insert.setString(5, expense.getCategory());
-        	insert.setString(6, username);
-        	
-    		// Add transaction
-    		insert.execute();
-    		
-    		// Update user's account balance
-        	return updateBalance(username, expense.getAmount());
-        	
-    	} catch (SQLException e) {
-    		System.out.println(e.getMessage());
-    		return null;
-    	}
+    	// Insert parameters from Transaction object.
+    	insert.setString(1, expense.getDescription());
+    	insert.setFloat(2, expense.getAmountInCents());
+    	insert.setString(3, expense.getDate().toString());
+    	insert.setString(4, expense.getMemo());
+    	insert.setString(5, expense.getCategory());
+    	insert.setString(6, username);
+    	
+		// Add transaction
+		insert.execute();
     }
     
     /**
      * Updates a users balance by an amount in the database.
      * @param username is the user whose balance will be updated in the database.
      * @param amount is the change applied to the user's balance.
-     * @return The new account balance or null if there was an exception.
+     * @return The new account balance.
+     * @throws SQLException if there was a problem updating the user's balance.
      */
-    private Double updateBalance(String username, double amount) {
+    public Integer updateBalance(String username, int amount) throws SQLException {
     	// Initialize both SQL statement and the prepared statements.
     	PreparedStatement check;
-    	String checkStmt = "SELECT balance FROM Users WHERE username = ?";
+    	String checkStmt = "SELECT balance_in_cents FROM Users WHERE username = ?";
     	PreparedStatement update;
-    	String updateStmt = "UPDATE Users SET balance = ? WHERE username = ?";
+    	String updateStmt = "UPDATE Users SET balance_in_cents = ? WHERE username = ?";
     	
-    	try {
-        	// Get current balance value
-    		check = this.conn.prepareStatement(checkStmt);
-    		check.clearParameters();
-    		check.setString(1, username);
-    		ResultSet checkResult = check.executeQuery();
-    		
-    		// Move the cursor forward
-    		checkResult.next();
-    		double balance = checkResult.getFloat(1);
-    		
-    		// Calculate new balance
-    		balance = balance + amount;
-    		
-    		// Update user balance
-    		update = this.conn.prepareStatement(updateStmt);
-    		update.clearParameters();
-    		update.setFloat(1, (float) balance);
-    		update.setString(2, username);
-    		update.execute();
-    		return balance;
-    		
-    	} catch (SQLException e) {
-    		System.out.println(e.getMessage());
-    		return null;
-    	}
+    	// Get current balance value
+		check = this.conn.prepareStatement(checkStmt);
+		check.clearParameters();
+		check.setString(1, username);
+		ResultSet checkResult = check.executeQuery();
+		
+		// Move the cursor forward
+		checkResult.next();
+		int balance = checkResult.getInt(1);
+		
+		// Calculate new balance
+		balance = balance + amount;
+		
+		// Update user balance
+		update = this.conn.prepareStatement(updateStmt);
+		update.clearParameters();
+		update.setFloat(1, balance);
+		update.setString(2, username);
+		update.execute();
+		
+		return balance;
     }
 
     /**
@@ -306,8 +282,96 @@ public class TransactionsDB {
 			return categories;
 			
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			TransactionHelper.printErrorToLog(e);
 			return null;
+		}
+	}
+	
+	/**
+	 * Changes the full name of a user in the database.
+	 * @param user is the user whose name will be changed.
+	 * @param newName is the new full name of the user.
+	 * @return True if the update was successfully executed.
+	 */
+	public boolean changeFullName(User user, String newName) {
+		// Initialize query and statement.
+		PreparedStatement update;
+		String sqlStmt = "UPDATE Users SET name = ? WHERE username = ?";
+		
+		try {
+			// Clear the parameters of the query.
+			update = this.conn.prepareStatement(sqlStmt);
+			update.clearParameters();
+			
+			// Set parameters
+			update.setString(1, newName);
+			update.setString(2, user.getUsername());
+			
+			// Execute update
+			update.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			TransactionHelper.printErrorToLog(e);
+			return false;
+		}
+	}
+	
+	/**
+	 * Changes the password of a user in the database.
+	 * @param user is the user whose password will be updated.
+	 * @param newPassword is the new password for this user.
+	 * @return True if the update was successfully executed.
+	 */
+	public boolean changePassword(User user, String newPassword) {
+		// Initialize query and statement.
+		PreparedStatement update;
+		String sqlStmt = "UPDATE Users SET password = ? WHERE username = ?";
+		
+		try {
+			// Clear the parameters of the query.
+			update = this.conn.prepareStatement(sqlStmt);
+			update.clearParameters();
+			
+			// Set parameters
+			update.setString(1, newPassword);
+			update.setString(2, user.getUsername());
+			
+			// Execute update
+			update.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			TransactionHelper.printErrorToLog(e);
+			return false;
+		}
+	}
+	
+	/**
+	 * Adds a new category to this DB.
+	 * @param category is the new category.
+	 * @return True if the category was successfully added.
+	 */
+	public boolean addCategory(String category) {
+		// Initialize query and SQL statement
+		PreparedStatement insert;
+		String sqlStmt = "INSERT INTO Categories VALUES(?)";
+		
+		try {
+			// Clear parameters
+			insert = this.conn.prepareStatement(sqlStmt);
+			insert.clearParameters();
+			
+			// Set parameter
+			insert.setString(1, category);
+			
+			// Execute insert
+			insert.execute();
+			return true;
+			
+		} catch (SQLException e) {
+			TransactionHelper.printErrorToLog(e);
+			return false;
 		}
 	}
 }

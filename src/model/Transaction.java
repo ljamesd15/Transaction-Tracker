@@ -9,10 +9,11 @@ import java.time.LocalDate;
 public class Transaction {
 
 	private final String description;
-	private final double amount;
+	private final int amount_in_cents;
 	private final LocalDate date;
 	private final String category;
 	private final String memo;
+	private final boolean isDeposit;
 	
 	// AF: 
 	// The description of the transaction must be non-null. 
@@ -20,7 +21,7 @@ public class Transaction {
 	// The category of this must be non-null.
 	// The memo of the transaction must be non-null.
 	
-	// RI: location != null, date != null, category != null, memo != null,
+	// RI: location != null, date != null, category != null, memo != null
 	
 	/**
 	 * Creates a new immutable transaction object using the builder object.
@@ -29,10 +30,11 @@ public class Transaction {
 	 */
 	private Transaction(TransactionBuilder builder) {
 		this.description = builder.description;
-		this.amount = builder.amount;
+		this.amount_in_cents = builder.amount_in_cents;
 		this.date = builder.date;
 		this.category = builder.category;
 		this.memo = builder.memo;
+		this.isDeposit = builder.isDeposit;
 		
 		// Make sure the representation invariant is satisfied.
 		this.checkRep();
@@ -46,10 +48,10 @@ public class Transaction {
 	}
 	
 	/**
-	 * @return The amount that was transfered due to this transaction.
+	 * @return The amount that was transfered due to this transaction in cents.
 	 */
-	public double getAmount() {
-		return this.amount;
+	public int getAmountInCents() {
+		return this.amount_in_cents;
 	}
 	
 	/**
@@ -73,6 +75,13 @@ public class Transaction {
 		return this.memo;
 	}
 	
+	/**
+	 * @return True if this transaction is a deposit.
+	 */
+	public boolean isADeposit() {
+		return this.isDeposit;
+	}
+	
 	
 	/**
 	 * A builder object for Transaction.
@@ -80,18 +89,21 @@ public class Transaction {
 	 */
 	public static class TransactionBuilder {
 		
-		private double amount;
+		private int amount_in_cents;
 		private String description;
 		private String category;
 		private String memo;
 		private LocalDate date;
+		private boolean isDeposit;
 		
 		/**
 		 * Creates a TransactionBuilder object which can be slowly fleshed out until all 
 		 * information has been filled in. Once enough information has been filled in then a
 		 * Transaction object may be built.
+		 * @param isDeposit determines if this transaction is a deposit.
 		 */
-		public TransactionBuilder() {
+		public TransactionBuilder(boolean isDeposit) {
+			this.isDeposit = isDeposit;
 		}
 		
 		/**
@@ -116,25 +128,24 @@ public class Transaction {
 		}
 		
 		/**
-		 * Sets the amount of the this transaction. If this transaction's category is a deposit
+		 * Sets the amount of the this transaction. If this transaction's type is a deposit
 		 * then the amount will be made positive and otherwise will be made negative.
-		 * @param amount is the amount that was transfered during this transaction.
+		 * @param amount is the amount that was transfered during this transaction in cents.
 		 */
-		public void setAmount(double amount) {
-			// If this transaction is explicitly said to be a deposit then make amount positive,
-			// otherwise change amount to be negative.
-			if (this.category != null && this.category.equals("Deposit")) {
-				this.amount = Math.abs(amount);
+		public void setAmountInCents(int amount) {
+			// If this transaction is a deposit set the amount to positive.
+			if (this.isDeposit) {
+				this.amount_in_cents = Math.abs(amount);
 			} else {
-				this.amount = -1 * Math.abs(amount);
+				this.amount_in_cents = -1 * Math.abs(amount);
 			}
 		}
 		
 		/**
-		 * @return the amount of this transaction.
+		 * @return the amount of this transaction in cents.
 		 */
-		public double getAmount() {
-			return this.amount;
+		public int getAmountInCents() {
+			return this.amount_in_cents;
 		}
 		
 		/**
@@ -174,7 +185,7 @@ public class Transaction {
 			
 			// Resetting the amount so that if this transactions amount is positive only if 
 			// it is a deposit.
-			this.setAmount(this.amount);
+			this.setAmountInCents(this.amount_in_cents);
 		}
 		
 		/**
@@ -202,6 +213,21 @@ public class Transaction {
 		 */
 		public String getMemo() {
 			return this.memo;
+		}
+		
+		/**
+		 * Sets the transaction type to the given parameter.
+		 * @param isDeposit determines is this transaction is a deposit.
+		 */
+		public void setAsDeposit(boolean isDeposit) {
+			this.isDeposit = isDeposit;
+		}
+		
+		/**
+		 * @return True if this transaction is a deposit.
+		 */
+		public boolean isADeposit() {
+			return this.isDeposit;
 		}
 		
 		/**

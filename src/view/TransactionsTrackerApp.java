@@ -3,9 +3,11 @@ package view;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import controller.TransactionHelper;
 import controller.TransactionsDB;
 import model.Transaction;
 import model.User;
+import model.BCrypt;
 
 /**
  * Text based interface for clients to query and update the database in order to log in, add 
@@ -14,9 +16,8 @@ import model.User;
  */
 public class TransactionsTrackerApp {
 	
-	// An array of strings containing the default user expense categories.
-	private final String[] defaultCategories = new String[]
-			{"Deposit", "Food", "Housing", "Transportation", "Misc."};
+	// Max number of incorrect password attempts.
+	private final int MIN_INCORRECT_LOGIN_ATTEMPTS = 3;
 	
 	// The Transaction Tracker database.
 	private final TransactionsDB db;
@@ -30,13 +31,13 @@ public class TransactionsTrackerApp {
 	}
 	
 	/** Entry point for the text user interface */
-	public static void main( String args[] ) throws SQLException {
+	public static void main(String[] args) throws SQLException {
 		TransactionsDB db = new TransactionsDB();
 	    db.open();
 	      
 	    try {
 	    	//db.prepare();
-	    	  
+	    	TransactionHelper.prepare();
 	    	TransactionsTrackerApp app = new TransactionsTrackerApp(db);
 	    	app.run();
 	    } finally {
@@ -46,63 +47,88 @@ public class TransactionsTrackerApp {
 	 
 	/** Runs the client until the user quits */
 	public void run() {
+		boolean keepGoing = true;
 		String response;
 		Scanner input = new Scanner(System.in);
 		
 	    System.out.println("Welcome to Transactions Tracker!");
 	    System.out.println("Type '0' to get a list of commands.");
 	    
-	    while (true) {
-		    System.out.print('\n' + "What would you like to do?" + '\n' + "> ");
-		    response = input.nextLine();
+	    while (keepGoing) {
+		    System.out.print('\n' + "(Main Menu) What would you like to do?" + '\n' + "> ");
+		    response = input.nextLine().toLowerCase();
 		    
-	    	if (response.equals("0")) {
-	    		// Print available commands
-	    		this.printCommands();
-	    	
-	    	} else if (response.equals("1") && this.currentUser == null) {
-	    		// Log in a user
-	    		this.login(input);
-	    		
-	    	} else if (response.equals("1") && this.currentUser != null) {
-	    		// Log out the current user
-	    		this.logout();
-	    		
-	    	} else if (response.equals("2")) {
-	    		// Creates a new user
-	    		this.createUser(input);	
-	    		
-	    	} else if (response.equals("3")) {
-	    		// Preferences
-	    		this.preferences();
-	    	
-	    	} else if (response.equals("4")) {
-	    		// Create a new expense
-	    		this.addTransaction(input);
-	    		
-	    	} else if (response.equals("5")) {
-	    		// Show transaction history
-	    		this.showTransactionHistory();
-	    	
-	    	} else if (response.equals("exit")) {
-	    		// Exit the application
-	    		this.exit();
-	    		break;
-
-	    	} else {
-	    		System.out.println("Unrecognised command : " + response);
-				System.out.println("Type '0' to see a list of "
-						+ "valid commands.");
+		    // Prevent null pointer exceptions.
+		    if (response == null) {
+		    	this.unrecognisedCommand("");
+		    }
+		    
+		    // For ease of reading used switch statements to determine what the program 
+		    // should do next given a user input.
+		    switch (response) {
+		    
+		    	case "0":
+		    		// Print available commands
+		    		this.printCommands();
+		    		break;
+		    		
+		    	case "1":	
+		    		if (this.currentUser == null) {
+		    			// Log in a user
+		    			this.login(input);
+		    		} else {
+		    			// Log out the current user
+		    			this.logout();
+		    		}
+		    		break;
+		    		
+		    	case "2":
+		    		// Creates a new user
+		    		this.createUser(input);
+		    		break;
+		    		
+		    	case "3":
+		    		// Settings
+		    		this.settings(input);
+		    		break;
+		    	
+		    	case "4":
+		    		// Create a new expense
+		    		this.addTransaction(input);
+		    		break;
+		    		
+		    	case "5":
+		    		// Show transaction history
+		    		this.showTransactionHistory();
+		    		break;
+		    		
+		    	case "exit":
+	    	   		// Exit the application
+		    		this.exit();
+		    		keepGoing = false;
+		    		break;
+		    	
+		    	default:
+		    		// Does not fit into any cases.
+		    		this.unrecognisedCommand(response);
 	    	}
 	    }
 	}
-
-	/**
-	 * Prints the available commands for this program.
+	
+	/** 
+	 * Prints a message alerting the user that the command was invalid.
+	 * @param The command which was invalid.
 	 */
+	private void unrecognisedCommand(String response) {
+		System.out.println("Unrecognised command: " + response);
+		System.out.println("Type '0' to see a list of "
+				+ "valid commands.");
+	}
+
+	/** Prints the available commands for this program. */
 	private void printCommands() {
-		System.out.println('\n' + "Commands are:");
-		System.out.println("'0' to get a list of commands.");
+		System.out.println('\n' + "Main menu commands are:");
+		System.out.println("'0' to get a list of main menu commands.");
 		
 		// If no user logged in, option 1 is to log in.
 		if (this.currentUser == null) {
@@ -113,7 +139,7 @@ public class TransactionsTrackerApp {
 		}
 		
 		System.out.println("'2' to create a new user.");
-		System.out.println("'3' for program preferences.");
+		System.out.println("'3' for settings.");
 		System.out.println("'4' to enter a new expense.");
 		System.out.println("'5' to display your transaction history.");
 		System.out.println("'exit' to leave.");
@@ -124,29 +150,51 @@ public class TransactionsTrackerApp {
 	 * @param input is the scanner used to read user input.
 	 */
 	private void login(Scanner input) {
+		
+		// Initialize variables
+		String username;
+		String password;
+		User dbUser;
+		int incorrectAttempts = 0;
 
-		// Get user name and password from the user.
-		System.out.print('\n' + "Username: ");
-		String username = input.nextLine();
-		System.out.print("Password: ");
-		String password = input.nextLine();
-		
-		System.out.println("Logging in...");
-		User loggedInUser = this.db.logIn(username, password);
-		
-		while (loggedInUser == null) {
-			System.out.println("Invalid username or password.");
-			
+		do {
+			// Get user name and password from the user.
 			System.out.print('\n' + "Username: ");
 			username = input.nextLine();
 			System.out.print("Password: ");
 			password = input.nextLine();
 			
-			loggedInUser = this.db.logIn(username, password);
-		}
+			System.out.println("Logging in...");
+			dbUser = this.db.logIn(username);
+			
+			// Check if user name is valid (non-null dbUser) and if password is correct for 
+			// user name.
+			if (dbUser != null && BCrypt.checkpw(password, dbUser.getPassword())) {
+				break;
+			}
+			
+			incorrectAttempts++;
+			
+			// If there has been MIN_INCORRECT_LOGIN_ATTEMPTS then exit program.
+			if (incorrectAttempts == MIN_INCORRECT_LOGIN_ATTEMPTS) {
+				System.out.println("You have entered too many incorrect log-in attempts.");
+				System.out.println("Please try again later.");
+				try {
+					this.db.close();
+				} catch (SQLException e) {
+					// Print error to log file.
+					TransactionHelper.printErrorToLog(e);
+				}
+				System.exit(1);
+			}
+			
+			// Alert user of invalid log in information
+			System.out.println("Invalid username or password.");
+			
+		} while(true);
 		
-		this.currentUser = loggedInUser;
-		System.out.println("Hello " + this.currentUser.getName());
+		this.currentUser = dbUser;
+		System.out.println("Hello " + this.currentUser.getFullName());
 	}
 	
 	/** Attempts to logout the currently logged in user. */
@@ -163,21 +211,28 @@ public class TransactionsTrackerApp {
 	 */
 	private void createUser(Scanner input) {
 		System.out.println("Creating new user...");
-		User newUser = CreateNewUser.run(input, this.db);
+		User newUser = UserInformation.run(input, this.db);
 		boolean addedCorrectly = this.db.addNewUser(newUser);
 		
 		if (addedCorrectly) {
 			System.out.println("Added user.");
 		} else {
-			System.out.println("Failed to add user and default categories.");
-			System.out.println("Please try again later.");
+			System.out.println("Failed to add user, please try again later.");
 		}
 	}
 
-	/** Allows user to edit program preferences */
-	private void preferences() {
-		System.out.println("This option has not yet been implemented.");
-		System.out.println("Please pick a different option.");
+	/** 
+	 * Allows user to edit settings. 
+	 * @param input the scanner to read user input.
+	 */
+	private void settings(Scanner input) {
+		if (this.currentUser == null) {
+			// Must be logged in before editing settings.
+			System.out.println("Please log in before editing settings.");
+		} else {
+			// Go to settings.
+			Settings.run(this.db, input, this.currentUser);
+		}
 	}
 	
 	/**
@@ -195,28 +250,50 @@ public class TransactionsTrackerApp {
 
 		// If categories are null set them to the default categories and alert user.
 		if (categories == null) {
-			System.out.println("Cannot get all avaliable categories at this time.");
-			System.out.println("Default categories will only be avaliable.");
-			categories = this.defaultCategories;
+			System.out.println("Cannot get avaliable categories at this time.");
+			System.out.println("Please try again later.");
+			return;
 		}
 		
 		// Make a Transaction object.
 		Transaction trans = CreateNewTransaction.run(input, categories);
 		
-		// Add transaction to database
-		Double balance = this.db.addExpense(trans, this.currentUser.getUsername());
-		
-		if (balance == null) {
-			System.out.println("Unable to add transaction and update balance. "
-					+ "Please try again later.");
+
+		try {
+			// Begin the transaction
+			this.db.beginTransaction();
+			
+			// Add transaction to database
+			this.db.addExpense(trans, this.currentUser.getUsername());
+			
+			// Change the user's balance by the amount of the transaction. 
+			double newBal = this.db.updateBalance(this.currentUser.getUsername(), 
+					trans.getAmountInCents());
+			
+			// Commit the transaction
+			this.db.commitTransaction();
+			
+			// Set the logged in user objects' new balance.
+			this.currentUser.setUserBalance(newBal / 100.0);
+			// We are dividing by 100 because the balances are stored in cents on the database.
+			
+			// Print new balance
+			System.out.println("Your current balance is $" + this.currentUser.getUserBalance());
+			
+		} catch (SQLException e) {
+			
+			// Roll back the transaction
+			try {
+				this.db.rollbackTransaction();
+				
+			} catch (SQLException e1) {
+				TransactionHelper.printErrorToLog(e1);
+			}
+			
+			TransactionHelper.printErrorToLog(e);
+			System.out.println("Error adding transaction. Please see the log file.");
 			return;
 		}
-		
-		// Set the logged in user objects' new balance.
-		this.currentUser.setUserBalance(balance);
-		
-		// Print new balance
-		System.out.println("Your current balance is $" + balance.doubleValue());
 	}
 
 	

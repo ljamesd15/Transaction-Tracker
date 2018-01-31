@@ -1,9 +1,34 @@
 # Transactions-Tracker
-An independent side project where users can monitor their both incoming and outgoing expenses.
+An independent side project where users can monitor their both incoming and outgoing transactions.
 	
-This program, using SQLite, stores information about each user, their transactions, and program preferences. With a text user interface a user can log into an account (and log out), check their current balance, add new transactions, look at their transaction history (soon), and edit program preferences (soon). Users can use Transactions Tracker to monitor their expenses and see how much they are spending in certain categories, at certain locations, and much much more. Transactions Tracker allows users to become more fiscally responsible and aware of where money is both coming in from and more importantly where it is going to.
+This program, using SQLite, stores user information, user transactions, user preferences, and 
+program preferences. The database securely stores user password with BCrypt and more information
+encryption to come. A user, through a text interface, can create a new account, log in and out of 
+their current account, check their current balance, add new transactions, edit user and program 
+settings, and soon will be able to see a breakdown of their transactions. Users can use 
+Transactions Tracker to monitor their expenses and see how much they are spending in certain 
+categories, at certain locations, and much much more. Transactions Tracker allows users to become 
+more fiscally responsible and aware of where money is both coming in from and more importantly 
+where it is going to.
 
 PATCH NOTES
+
+v 1.3.21 Default categories for new databases have been reduced to only "N/A". Made database
+	transactions follow ACID properties with commits and roll backs. (1/30/18)
+
+v 1.3.20 Now stores encrypted passwords in database using BCrypt. Terminates session if there are 
+	too many incorrect log in attempts. The database file was added to git so now all users can use 
+	the same database. (1/25/18)
+
+v 1.3.11 Changed the way transaction information is printed when asking the user if the transaction
+	info is correct. Fixed precision rounding errors. Errors messages will now be printed to a log 
+	file. (12/29/17)
+
+v 1.3.10 Added option for users to edit various settings such as their full name, password, and
+	transaction categories. (12/28/18)
+	
+v 1.3.06 Added all files onto GitHub and can now use version control for managing this project.
+	(12/27/2018)
 
 v 1.3.05 Edited all method headers and comments to ensure clarity for both future implementors and
 	clients. (12/26/17)
@@ -17,7 +42,7 @@ v 1.3.03 Log in, create new user, log out, and add new expense all work properly
 v 1.3.02 Added the ability to create new users, log in, log out. Fixed some bugs (12/22/17)
 
 v 1.3.01 Rewrote the application to make use of SQLite database instead of storing info on a 
-	txt or csv file. (12/22/2017)
+	.txt or .csv file. (12/22/2017)
 
 v 1.2.23 Added enums to Transaction, implemented view, organized methods to controller package. 
 	Output files will now be written in CSV format (10/26/17)

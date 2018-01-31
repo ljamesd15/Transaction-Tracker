@@ -4,12 +4,12 @@ package model;
  * Holds all the information of a certain transaction. 
  * @author L. James Davidson
  */
-public class User {
+public final class User {
 
   private final String username;
-  private final String fullName;
+  private String fullName;
   private double balance;
-  private final String password;
+  private String password;
 
   /** 
    * Creates a User object. 
@@ -25,13 +25,18 @@ public class User {
     this.password = password;
   }
   
-  /** @return the user name of this user. */
+  /** @return The user name of this user. */
   public String getUsername() {
 	  return this.username;
   }
   
-  /** @return the full name of this user. */
-  public String getName() {
+  /** @param fullName is the new full name of this user. */
+  public void setUserFullName(String fullName) {
+	  this.fullName = fullName;
+  }
+  
+  /** @return The full name of this user. */
+  public String getFullName() {
 	  return this.fullName;
   }
   
@@ -40,12 +45,17 @@ public class User {
 	  this.balance = newBalance;
   }
   
-  /** @return the users' account balance. */
+  /** @return The users' account balance. */
   public double getUserBalance() {
 	  return this.balance;
   }
   
-  /** @return the password of this user. */
+  /** @param password is the new password of this user. */
+  public void setPassword(String password) {
+	  this.password = password;
+  }
+  
+  /** @return The password of this user. */
   public String getPassword() {
 	  return this.password;
   }

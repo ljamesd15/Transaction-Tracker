@@ -12,7 +12,7 @@ import model.Transaction.TransactionBuilder;
  * objects from user information.
  * @author L. James Davidson
  */
-class CreateNewTransaction {
+abstract class CreateNewTransaction {
 
 	// Constants regarding the restrictions from the SQLite database tables.
 	private static final int MAX_DESCR_CHARS = 20;
@@ -29,7 +29,11 @@ class CreateNewTransaction {
 	 * @param input is the scanner which reads user input.
 	 */
 	protected static Transaction run(Scanner input, String[] categoryNames) {
-		TransactionBuilder transfer = new TransactionBuilder();
+		
+		// Get the type of the transaction
+		boolean isDeposit = getType(input);
+		
+		TransactionBuilder transfer = new TransactionBuilder(isDeposit);
 		categories = categoryNames;
 		today = LocalDate.now();
 		
@@ -55,6 +59,16 @@ class CreateNewTransaction {
 		return transfer.build();
 	}
 	
+	/**
+	 * Asks user if this transaction was a deposit.
+	 * @param input the scanner to read user input.
+	 * @return True if this transaction was a deposit.
+	 */
+	private static boolean getType(Scanner input) {
+		String question = "Was this transaction a deposit?";
+		return TransactionHelper.yesNo(input, question);
+	}
+
 	/**
 	 * Sets the description of the TransactionBuilder.
 	 * @param input is the scanner used to get user input.
@@ -92,7 +106,7 @@ class CreateNewTransaction {
 			System.out.print('\n' + "What was the amount of the transaction?" + '\n' + "> ");
 			response = input.nextLine();
 			try {
-				transfer.setAmount(Double.parseDouble(response));
+				transfer.setAmountInCents((int) Math.round(Double.parseDouble(response) * 100));
 				break;
 				
 			} catch (NumberFormatException e) {
@@ -342,13 +356,18 @@ class CreateNewTransaction {
 	private static void checkProperInfo(Scanner input, TransactionBuilder transfer) {
 		System.out.println("The information of the transaction is as follows...");
 		printTransInfo(transfer);
+		boolean answer;
 		
-		String question = "Is this information correct?";
-		boolean answer = TransactionHelper.yesNo(input, question);
-		
-		// If the information is not correct then have the user edit the information.
-		if (!answer) {
-			editTransInfo(input, transfer);
+		while (true) {	
+			String question = "Would you like to edit anything?";
+			answer = TransactionHelper.yesNo(input, question);
+			
+			// If the information is not correct then have the user edit the information.
+			if (answer) {
+				editTransInfo(input, transfer);
+			} else {
+				break;
+			}
 		}
 	}
 
@@ -359,13 +378,14 @@ class CreateNewTransaction {
 	 * @modifies The transactions information where the user sees fit.
 	 */
 	private static void editTransInfo(Scanner input, TransactionBuilder transfer) {
+		System.out.println('\n' + "Type '0' to edit the description.");
+		System.out.println("Type '1' to edit the amount.");
+		System.out.println("Type '2' to edit the date.");
+		System.out.println("Type '3' to edit the category.");
+		System.out.println("Type '4' to edit the memo.");
+		System.out.println("Type '5' to change if this transaction was a deposit.");
+		
 		while (true) {
-			System.out.println("Type '0' to edit the description.");
-			System.out.println("Type '1' to edit the amount.");
-			System.out.println("Type '2' to edit the date.");
-			System.out.println("Type '3' to edit the category.");
-			System.out.println("Type '4' to edit the memo.");
-			
 			System.out.print('\n' + "What would you like to edit?" + '\n' + "> ");
 			int response;
 			try {
@@ -375,37 +395,44 @@ class CreateNewTransaction {
 				continue;
 			}
 			
-			if (response == 0) {
-				setDescription(input, transfer);
-			} else if (response == 1) {
-				setAmount(input, transfer);
-			} else if (response == 2) {
-				setDate(input, transfer);
-			} else if (response == 3) {
-				setCategory(input, transfer);
-			} else if (response == 4) {
-				setMemo(input, transfer);
-			} else {
-				System.out.println("Invalid response please type a number 0-4.");
-				continue;
-			}
-			
-			System.out.println("The updated transaction information is as follows...");
-			printTransInfo(transfer);
-			
-			while(true) {
-				String question = "Would you like to edit anything else?";
-				boolean answer = TransactionHelper.yesNo(input, question);
-				
-				// If the user does not want to edit anything else then return, otherwise break
-				// from this while loop.
-				if (answer) {
+			switch (response) {
+				case 0: 
+					setDescription(input, transfer);
 					break;
-				} else {
-					return;
-				}
+					
+				case 1:
+					setAmount(input, transfer);
+					break;
+					
+				case 2:
+					setDate(input, transfer);
+					break;
+					
+				case 3:
+					setCategory(input, transfer);
+					break;
+					
+				case 4:
+					setMemo(input, transfer);
+					break;
+					
+				case 5:
+					transfer.setAsDeposit(getType(input));
+					// Reset the amount of the transaction because the type may have changed.
+					transfer.setAmountInCents(transfer.getAmountInCents());
+					break;
+					
+				default:
+					System.out.println("Invalid response please type a number 0-5.");
+					continue;
+					
 			}
+			
+			break;
 		}
+
+		System.out.println("The updated transaction information is as follows...");
+		printTransInfo(transfer);
 	}
 	
 	/**
@@ -413,23 +440,23 @@ class CreateNewTransaction {
 	 * @param transfer is the TransactionBuilder object whose information will be printed.
 	 */
 	public static void printTransInfo(TransactionBuilder transfer) {
-		System.out.print("Location: ");
+		System.out.print("Location:  ");
 		System.out.printf("%-20s", transfer.getDescription());
 		System.out.println();
 		
-		System.out.print("Amount: ");
-		System.out.printf("%+.2f", transfer.getAmount());
+		System.out.print("Amount:    $");
+		System.out.printf("%+.2f", transfer.getAmountInCents() / 100.0);
 		System.out.println();
 		
-		System.out.print("Date: ");
+		System.out.print("Date:      ");
 		System.out.printf("%-10s", transfer.getDate().toString());
 		System.out.println();
 		
-		System.out.print("Category: ");
+		System.out.print("Category:  ");
 		System.out.printf("%-20s", transfer.getCategory());
 		System.out.println();
 		
-		System.out.print("Memo: ");
+		System.out.print("Memo:      ");
 		System.out.printf("%-30s", transfer.getMemo());
 		System.out.println();
 	}
