@@ -7,7 +7,9 @@ TO DO LIST:
 
 - Program options : show history (non-graphic, no charts just text based)
 
-- Encrypt user balance
+- Encrypt user balance, user name and all transaction information to and from database
+
+- Create a web application for TT
 	
 - If SQLite DB is locked hold transaction information and add it when available.
 
