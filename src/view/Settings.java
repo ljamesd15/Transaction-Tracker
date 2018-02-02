@@ -10,10 +10,6 @@ class Settings {
 
 	// Constants regarding the restrictions from the SQLite database tables.
 	private static final int MAX_CATNAME_CHARS = 30;
-	
-	// An array of strings containing the default user expense categories.
-	protected static final String[] DEFAULT_CATEGORIES = new String[]
-			{"Deposit", "Food", "Housing", "Transportation", "Misc."};
 
 	/**
 	 * Allows user to access available settings.
@@ -104,11 +100,6 @@ class Settings {
 					addCategory(db, input);
 					break;
 				
-				case "2":
-					// Remove a category
-					removeCategory(db, input);
-					break;
-				
 				case "back":
 					// Return to settings menu
 					keepGoing = false;
@@ -127,7 +118,6 @@ class Settings {
 		System.out.println('\n' + "Program settings menu commands are:" + '\n'
 				+ "'0' to get a list of program settings menu commands." + '\n'
 				+ "'1' to add a new expense category." + '\n'
-				+ "'2' to remove an expense category." + '\n'
 				+ "'back' to return to the settings menu.");
 	}
 
@@ -182,106 +172,6 @@ class Settings {
 		}
 	}
 	
-	/**
-	 * Removes an expense category from user input.
-	 * @param db the database whose categories will be edited.
-	 * @param input the scanner to read user input.
-	 */
-	private static void removeCategory(TransactionsDB db, Scanner input) {
-		// Determine which categories which can be removed. 
-		// (Categories added which are not default categories.)
-		String[] nonDefaultCategories = findNonDefaultCategories(db);
-		int numOfNonDefaultCategories = nonDefaultCategories.length;
-		
-		// If no non-default categories exist then alert user and return.
-		if (numOfNonDefaultCategories == 0) {
-			System.out.println("No removable categories.");
-			return;
-		}
-
-		// While the user input does not match a non-default category.
-		while (true) {
-			
-			// Print out non-default categories
-			System.out.print("Removable categories: ");
-			
-			// Print non-default categories differently depending on if there is 1, 2, or more.
-			if (numOfNonDefaultCategories == 1) {
-				System.out.println(nonDefaultCategories[0] + ".");
-				
-			} else  if (numOfNonDefaultCategories == 2){
-				System.out.println(nonDefaultCategories[0] + " and " + nonDefaultCategories[1]);
-				
-			} else {
-				for (int i = 0; i < numOfNonDefaultCategories - 1; i++) {
-					System.out.print(nonDefaultCategories[i] + ", ");
-				}
-				System.out.println("and " + nonDefaultCategories[numOfNonDefaultCategories - 1]);
-			}
-			
-			System.out.print('\n' + "What is the name of the category you would like to "
-					+ "remove?" + '\n' + "> ");
-			String categoryName = input.nextLine();
-			
-			// Determine if user response matches a non-default category. 
-			for (int i = 0; i < numOfNonDefaultCategories; i++) {
-				
-				if (nonDefaultCategories[i].toLowerCase().equals(categoryName.toLowerCase())) {
-					
-					// Remove category from DB
-					boolean executed = db.removeCategory(nonDefaultCategories[i]);
-					
-					// Inform user of outcome
-					if (executed) {
-						System.out.println("Successfully removed category: " 
-								+ nonDefaultCategories[i]);
-					} else {
-						System.out.println("Unable to remove category, please try again later.");
-					}
-					
-					return;
-				}
-			}
-			
-			// If we reach this point then the user response did not match a non-default category.
-			System.out.println("Invalid response. " + categoryName 
-					+ " did not match any of the removable categories.");
-		}
-	}
-	
-	/**
-	 * Finds the categories which are not the default categories of this DB.
-	 * @param db is the database whose categories are examined.
-	 * @return A string array of those categories in this DB which are not default.
-	 */
-	private static String[] findNonDefaultCategories(TransactionsDB db) {
-		String[] categories = db.getCategories();
-		
-		int numOfNonDefaultCategories = 0;
-		String[] nonDefaultCategories = new String[categories.length - DEFAULT_CATEGORIES.length];
-		for (int i = 0; i < categories.length; i++) {
-			boolean contained = false;
-			
-			// Nested loop but default categories length is 4. So O(categories.length) runtime
-			for (int j = 0; j < DEFAULT_CATEGORIES.length; j++) {
-				
-				if (categories[i].equals(DEFAULT_CATEGORIES[j])) {
-					// This category is a default category.
-					contained = true;
-				}
-			}
-			
-			// If the category is not contained in both arrays then add it to the 
-			// non-default category array.
-			if (!contained) {
-				nonDefaultCategories[numOfNonDefaultCategories] = categories[i];
-				numOfNonDefaultCategories++;
-			}
-		}
-		
-		return nonDefaultCategories;
-	}
-
 	/**
 	 * Allows user to access user specific settings.
 	 * @param db is the database whose user information will be edited.

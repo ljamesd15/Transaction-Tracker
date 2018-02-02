@@ -36,10 +36,5 @@ belongsTo       VARCHAR(30)     REFERENCES Users(username)
 PRIMARY KEY (description, price_in_cents, day, belongsTo)
 );
 
--- Adds basic categories
-INSERT INTO Categories VALUES ("Deposit");
-INSERT INTO Categories VALUES ("Food");
-INSERT INTO Categories VALUES ("Housing");
-INSERT INTO Categories VALUES ("Transportation");
-INSERT INTO Categories VALUES ("Misc.");
+-- Add the not applicable category.
 INSERT INTO Categories VALUES ("N/A");

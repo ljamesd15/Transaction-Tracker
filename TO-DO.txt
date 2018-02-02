@@ -5,13 +5,11 @@ TO DO LIST:
 						 Main menu (invalid number, non-number input)
 						 Settings (not logged in, category name too long, category already exists)
 
-- Program options : show history
+- Program options : show history (non-graphic, no charts just text based)
 
-- Edit when I need to send info to log file and when I can't just alert user through text
+- Encrypt user balance, user name and all transaction information to and from database
 
-- Encrypt user balance
-
-- make the adding a transaction a DB transaction where I can roll back if need be.
+- Create a web application for TT
 	
 - If SQLite DB is locked hold transaction information and add it when available.
 
