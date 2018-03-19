@@ -1,4 +1,4 @@
-package view;
+package downloadApp;
 
 import java.util.Scanner;
 
