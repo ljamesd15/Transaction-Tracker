@@ -1,4 +1,4 @@
-package downloadApp;
+package clientApp;
 
 import java.time.LocalDate;
 import java.util.Scanner;

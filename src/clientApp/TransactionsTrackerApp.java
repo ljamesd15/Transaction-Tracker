@@ -1,4 +1,4 @@
-package downloadApp;
+package clientApp;
 
 import java.sql.SQLException;
 import java.util.Scanner;
