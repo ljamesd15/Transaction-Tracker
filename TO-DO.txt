@@ -9,8 +9,7 @@ TO DO LIST:
 
 - Encrypt user balance, user name and all transaction information to and from database
 
-- Create a web application for TT
-	
-- If SQLite DB is locked hold transaction information and add it when available.
+- Create a web application for TT (Summer)
 
-- GUI (ability to go back at any point, remember me option to store user info to prevent repeated log ins)
+- GUI (ability to go back at any point, remember me option to store user info to prevent repeated 
+log ins, new notification of error dont print to console)

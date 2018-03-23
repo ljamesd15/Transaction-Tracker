@@ -2,7 +2,7 @@ package view;
 
 import java.util.Scanner;
 
-import controller.TransactionsDB;
+import controller.TransactionDB;
 import model.BCrypt;
 import model.User;
 
@@ -17,7 +17,7 @@ class Settings {
 	 * @param input the scanner used to read user input.
 	 * @param currentUser is the currently logged in user.
 	 */
-	protected static void run(TransactionsDB db, Scanner input, User currentUser) {
+	protected static void run(TransactionDB db, Scanner input, User currentUser) {
 		printSettingsCommands();
 		
 		// Initializing user response.
@@ -75,7 +75,7 @@ class Settings {
 	 * @param db is the database whose information may be modified.
 	 * @param input the scanner to read user input.
 	 */
-	private static void programSettings(TransactionsDB db, Scanner input) {
+	private static void programSettings(TransactionDB db, Scanner input) {
 		printProgramSettingsCommands();
 		
 		// Initializing user response.
@@ -126,7 +126,7 @@ class Settings {
 	 * @param db the database whose categories will be edited.
 	 * @param input the scanner to read user input.
 	 */
-	private static void addCategory(TransactionsDB db, Scanner input) {
+	private static void addCategory(TransactionDB db, Scanner input) {
 		String[] categories = db.getCategories();
 
 		while (true) {
@@ -178,7 +178,7 @@ class Settings {
 	 * @param input the scanner to read user input.
 	 * @param user is the user whose settings will be accessed.
 	 */
-	private static void userSettings(TransactionsDB db, Scanner input, User user) {
+	private static void userSettings(TransactionDB db, Scanner input, User user) {
 		printUserSettingsCommands();
 		
 		// Initializing user response.
@@ -236,7 +236,7 @@ class Settings {
 	 * @param user is the logged in user whose information will be edited.
 	 * @modifies The logged in user's full name.
 	 */
-	private static void editUserFullName(TransactionsDB db, Scanner input, User user) {
+	private static void editUserFullName(TransactionDB db, Scanner input, User user) {
 		
 		while (true) {
 			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
@@ -277,7 +277,7 @@ class Settings {
 	 * @param user is the logged in user whose information will be edited.
 	 * @modifies The logged in user's password.
 	 */
-	private static void editUserPassword(TransactionsDB db, Scanner input, User user) {
+	private static void editUserPassword(TransactionDB db, Scanner input, User user) {
 		
 		while (true) {
 			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");

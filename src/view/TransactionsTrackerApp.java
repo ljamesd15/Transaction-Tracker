@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import controller.TransactionHelper;
-import controller.TransactionsDB;
+import controller.TransactionDB;
 import model.Transaction;
 import model.User;
 import model.BCrypt;
@@ -20,19 +20,19 @@ public class TransactionsTrackerApp {
 	private final int MIN_INCORRECT_LOGIN_ATTEMPTS = 3;
 	
 	// The Transaction Tracker database.
-	private final TransactionsDB db;
+	private final TransactionDB db;
 	
 	// The current signed in user to this database.
 	private User currentUser;
 	
 	/** Initializes this application */
-	private TransactionsTrackerApp(TransactionsDB db) {
+	private TransactionsTrackerApp(TransactionDB db) {
 		this.db = db;
 	}
 	
 	/** Entry point for the text user interface */
 	public static void main(String[] args) throws SQLException {
-		TransactionsDB db = new TransactionsDB();
+		TransactionDB db = new TransactionDB();
 	    db.open();
 	      
 	    try {

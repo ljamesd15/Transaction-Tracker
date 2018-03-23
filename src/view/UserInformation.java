@@ -2,7 +2,7 @@ package view;
 
 import java.util.Scanner;
 
-import controller.TransactionsDB;
+import controller.TransactionDB;
 import model.BCrypt;
 import model.User;
 
@@ -28,7 +28,7 @@ abstract class UserInformation {
 	 * @param db is the database where the new user will be added to.
 	 * @return A User object containing the new user information.
 	 */
-	protected static User run(Scanner input, TransactionsDB db) {
+	protected static User run(Scanner input, TransactionDB db) {
 		
 		// Determine the new user's user name
 		String username = setUsername(input, db);
@@ -48,7 +48,7 @@ abstract class UserInformation {
 	 * @param db is the database which the new user will eventually be added to.
 	 * @return The user's user name
 	 */
-	private static String setUsername(Scanner input, TransactionsDB db) {
+	private static String setUsername(Scanner input, TransactionDB db) {
 		String username;
 		boolean usernameTaken;
 		

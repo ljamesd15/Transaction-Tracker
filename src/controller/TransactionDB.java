@@ -13,7 +13,7 @@ import model.User;
  * Allows clients to query and update the database in order to log in, add transactions, and 
  * breakdown expenses via date, price, categories, and more.
  */
-public class TransactionsDB {
+public class TransactionDB {
 
 	/** Holds the connection to the database. */
 	private Connection conn;
