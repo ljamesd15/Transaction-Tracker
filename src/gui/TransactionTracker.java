@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.sql.SQLException;
+import java.time.LocalTime;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -30,7 +31,7 @@ public class TransactionTracker {
 	private static final Font appFont = new Font(Font.SERIF, Font.PLAIN, 14);
 	
 	// Max number of incorrect password attempts.
-	private int INCORRECT_LOGIN_ATTEMPTS_REMAINING = 3;
+	private int LOGIN_ATTEMPTS_REMAINING = 5;
 	
 	// The Transaction-Tracker DB
 	private final TransactionDB db;
@@ -56,14 +57,9 @@ public class TransactionTracker {
 		String dbFilePath = (new File("")).getAbsolutePath() + "\\data\\TT.db";
 		TransactionDB db = new TransactionDB(dbFilePath);
 	      
-	    try {
-	    	//db.prepare();
-	    	TransactionHelper.prepare();
-	    	TransactionTracker app = new TransactionTracker(db);
-	    	app.run();
-	    } finally {
-	    	db.close();
-	    }
+    	TransactionHelper.prepare();
+    	TransactionTracker app = new TransactionTracker(db);
+    	app.run();
 	}
 	
 	/**
@@ -71,24 +67,9 @@ public class TransactionTracker {
 	 */
 	private void run() {
 		this.intialiseFrame();
-		boolean keepGoing = true;
-		
-		while (keepGoing) {
-			this.createNewMainPanel();
-			
-			if (this.currentUser == null) {
-				// Set up log in page
-				this.addTitle(this.mainPanel);
-				this.addSignUpArea(this.mainPanel);
-				this.addSignInArea(this.mainPanel);
-			} else {
-				// We have a logged in user
-				
-			}
-			
-			
-			this.mainFrame.setVisible(true);
-		}
+		this.createNewMainPanel();
+		this.createWelcomePage(this.mainPanel, false);
+		this.mainFrame.setVisible(true);
 	}
 	
 	/** Creates a main GUI frame, sets mainFrame and sets mainPanel class variables. */
@@ -104,29 +85,29 @@ public class TransactionTracker {
 	/** Creates a fresh mainPanel, the largest panel in mainFrame. */
 	private void createNewMainPanel() {
 		Container c = this.mainFrame.getContentPane();
+		if (this.mainPanel != null) {
+			c.remove(this.mainPanel);
+		}
 		this.mainPanel = new JPanel();
 		this.mainPanel.setLayout(new BoxLayout(this.mainPanel, BoxLayout.PAGE_AXIS));
 		c.add(this.mainPanel);
 	}
 	
-	/**
-	 * Adds a title panel to the parameter panel.
-	 * @param panel the JPanel which will have a title panel added to it.
+	/** Creates the opening page for the Transaction Tracker GUI 
+	 * @param panel The JPanel which the welcome page will be displayed on.
+	 * @param invalidSignIn Determines whether a user will be alerted of an invalid sign-in 
+	 * attempt.
 	 */
-	private void addTitle(JPanel panel) {
-		JPanel title = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		JLabel titleLabel = new JLabel("Transaction Tracker");
-		titleLabel.setFont(titleFont);
-		title.add(titleLabel);
+	private void createWelcomePage(JPanel panel, boolean invalidSignIn) {		
+		// Add title
+		this.addTitle(panel);
 		
-		panel.add(title);
-	}
-	
-	/**
-	 * Adds a sign up panel to the parameter panel.
-	 * @param panel is JPanel which will have a sign-up panel added to it.
-	 */
-	private void addSignUpArea(JPanel panel) {
+		// Add greeting
+		JPanel greeting = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		greeting.add(new JLabel("Good " + TransactionHelper.getPeriodOfDay() + "!"));
+		panel.add(greeting);
+		
+		// Add sign up area
 		JPanel signUp = new JPanel();
 		signUp.setLayout(new BoxLayout(signUp, BoxLayout.PAGE_AXIS));
 		
@@ -137,18 +118,45 @@ public class TransactionTracker {
 		JPanel outerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		outerPanel.add(signUp);
 		panel.add(outerPanel);
+
+		// Add sign in area
+		this.addSignInField(panel, invalidSignIn);
 	}
 	
-	/**
-	 * Adds a log in panel to parameter panel.
-	 * @param panel the JPanel which will have a log in panel added to it.
+	/** Adds a title of "Transaction Tracker" to the panel. */
+	private void addTitle(JPanel panel) {
+		JPanel title = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		JLabel titleLabel = new JLabel("Transaction Tracker");
+		titleLabel.setFont(titleFont);
+		title.add(titleLabel);
+		panel.add(title);
+	}
+	
+	/** Adds a sign in field to the parameter panel. 
+	 * @param panel The JPanel which the sign in field page will be displayed on.
+	 * @param invalidSignIn Determines whether a user will be alerted of an invalid sign-in 
+	 * attempt.
 	 */
-	private void addSignInArea(JPanel panel) {
-		// User info text boxes
-		JPanel userInfo = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	private void addSignInField(JPanel panel, boolean invalidSignIn) {
 		JPanel userFields = new JPanel();
-		userInfo.add(userFields);
 		userFields.setLayout(new BoxLayout(userFields, BoxLayout.PAGE_AXIS));
+		
+		// Add alert to user if there was an invalid log in attempt
+		if (invalidSignIn) {
+			JPanel alert = new JPanel();
+			alert.setLayout(new BoxLayout(alert, BoxLayout.PAGE_AXIS));
+			alert.add(new JLabel("Invalid username or password."));
+			alert.add(new JButton("Forgot password?"));
+			
+			if (LOGIN_ATTEMPTS_REMAINING > 1) {
+				alert.add(new JLabel("You have " + LOGIN_ATTEMPTS_REMAINING + " attempts left."));
+			} else {
+				alert.add(new JLabel("You have 1 attempt left."));
+			}
+			JPanel invalidNotice = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			invalidNotice.add(alert);
+			userFields.add(invalidNotice);
+		}
 		
 		// User name text box
 		JPanel username = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -177,11 +185,16 @@ public class TransactionTracker {
 				
 				if (loggedInUser == null) {
 					// Incorrect log-in attempt
-					INCORRECT_LOGIN_ATTEMPTS_REMAINING--;
-					if (INCORRECT_LOGIN_ATTEMPTS_REMAINING == 0) {
+					LOGIN_ATTEMPTS_REMAINING--;
+					if (LOGIN_ATTEMPTS_REMAINING <= 0) {
 						usernameField.setEnabled(false);
 						passwordField.setEnabled(false);
+					} else {
+						createNewMainPanel();
+						createWelcomePage(mainPanel, true);
+						mainFrame.revalidate();
 					}
+					
 				} else {
 					currentUser = loggedInUser;
 				}
@@ -189,8 +202,11 @@ public class TransactionTracker {
 		});
 		signIn.add(signInButton);
 		userFields.add(signIn);
-		
-		panel.add(userInfo);
+
+
+		JPanel outerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		outerPanel.add(userFields);
+		panel.add(outerPanel);
 	}
 	
 	/**

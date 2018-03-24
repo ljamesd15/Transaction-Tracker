@@ -73,5 +73,28 @@ public class TransactionHelper {
 		// Alert user to error.
 		System.out.println("Something went wrong, please see log file at " + FILEPATH + "\\.log.");
     }
+    
+	
+	/** Returns the period of the day.
+	 * @returns "morning" for [0, 12), "afternoon" for [12, 17), and "evening" for [17, 23]
+	 */
+	public static String getPeriodOfDay() {
+		String periodOfDay;
+		int hour = (LocalTime.now()).getHour();
+		if (hour < 12) {
+			// [0, 12)
+			periodOfDay = "morning";
+			
+		} else if (hour < 17) {
+			// [12, 17)
+			periodOfDay = "afternoon";
+			
+		} else {
+			// [17, 23]
+			periodOfDay = "evening";
+		}
+		
+		return periodOfDay;
+	}
 }  
 
