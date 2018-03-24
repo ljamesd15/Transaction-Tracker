@@ -82,6 +82,20 @@ public class Transaction {
 		return this.isDeposit;
 	}
 	
+
+	@Override
+	/**
+	 * Format
+	 * %-30s//%-12.2f//%-10s//%-20s//%-30s
+	 * description//amountInCents//date//memo//category
+	 * @returns A string representation of the Transaction
+	 */
+	public String toString() {
+		return String.format("%-30s%-12.2f%-10s%-20s%-30s", this.getDescription(), 
+				this.getAmountInCents() / 100.0, this.getDate(), this.getMemo(), 
+				this.getCategory());
+	}
+	
 	
 	/**
 	 * A builder object for Transaction.

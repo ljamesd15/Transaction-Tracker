@@ -5,8 +5,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.Transaction;
+import model.Transaction.TransactionBuilder;
 import model.User;
 
 /**
@@ -369,6 +373,64 @@ public class TransactionDB {
 		} catch (SQLException e) {
 			TransactionHelper.printErrorToLog(e);
 			return false;
+		}
+	}
+	
+	/**
+	 * Gets recent transactions of a specific user. (If the user has fewer than numOfTransactions 
+	 * transactions stored in this db then all of the user's transaction will be returned.)
+	 * @param user The user whose transactions will be returned.
+	 * @param numOfTransactions The number of recent transactions which will be returned.
+	 * @requires numOfTransactions must be greater than 0.
+	 * @return The numOfTransactions most recent transactions from the given user.
+	 */
+	public Transaction[] getRecentTransactions(User user, int numOfTransactions) {
+		assert numOfTransactions > 0;
+		
+		PreparedStatement retrieve;
+		String sqlStmt = "SELECT * FROM Transactions WHERE belongsTo = ?" 
+			+ " ORDER BY day DESC LIMIT ?;";
+		
+		try {
+			// Clear parameters
+			retrieve = this.conn.prepareStatement(sqlStmt);
+			retrieve.clearParameters();
+			
+			// Set parameters
+			retrieve.setString(1, user.getUsername());
+			retrieve.setInt(2, numOfTransactions);
+			
+			// Execute query
+			ResultSet result = retrieve.executeQuery();
+			
+			// Prepare for parsing of transactions
+			List<Transaction> recentTrans = new ArrayList<Transaction>();
+			int counter = 0;
+			
+			// Add transactions to recentTrans
+			while (result.next()) {
+				String location = result.getString("description");
+				int amount = result.getInt("price_in_cents");
+				LocalDate date  = LocalDate.parse(result.getString("day"));
+				String memo = result.getString("memo");
+				String category = result.getString("category");
+				
+				TransactionBuilder trans = new TransactionBuilder(amount >= 0);
+				trans.setDescription(location);
+				trans.setAmountInCents(amount);
+				trans.setDate(date);
+				trans.setMemo(memo);
+				trans.setCategory(category);
+				
+				recentTrans.add(trans.build());
+				counter++;
+			}
+			
+			return recentTrans.toArray(new Transaction[counter]);
+			
+		} catch (SQLException e) {
+			TransactionHelper.printErrorToLog(e);
+			return new Transaction[0];
 		}
 	}
 }

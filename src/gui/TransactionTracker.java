@@ -3,11 +3,12 @@ package gui;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.sql.SQLException;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -22,6 +23,7 @@ import javax.swing.UIManager;
 import controller.TransactionDB;
 import controller.TransactionHelper;
 import model.BCrypt;
+import model.Transaction;
 import model.User;
 
 public class TransactionTracker {
@@ -32,6 +34,9 @@ public class TransactionTracker {
 	
 	// Max number of incorrect password attempts.
 	private int LOGIN_ATTEMPTS_REMAINING = 5;
+	
+	// Number of recent transaction to display
+	private static final int REC_TRANS_TO_DISP = 5; 
 	
 	// The Transaction-Tracker DB
 	private final TransactionDB db;
@@ -197,6 +202,9 @@ public class TransactionTracker {
 					
 				} else {
 					currentUser = loggedInUser;
+					createNewMainPanel();
+					createUserWelcomePage(mainPanel);
+					mainFrame.revalidate();
 				}
 			}
 		});
@@ -224,5 +232,86 @@ public class TransactionTracker {
 		} else {
 			return BCrypt.checkpw(password, u.getPassword()) ? u : null;
 		}
+	}
+	
+	/**
+	 * Creates a user based welcome page. Used to welcome a recently logged in user.
+	 * @param panel The JPanel which will have the user welcome page displayed on it.
+	 * @requires currentUser must be non-null.
+	 */
+	private void createUserWelcomePage(JPanel panel) {
+		// Title and greeting
+		this.addTitle(panel);
+		JPanel greeting = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		greeting.add(new JLabel("Good " + TransactionHelper.getPeriodOfDay() + " " 
+				+ this.currentUser.getFullName()));
+		panel.add(greeting);
+		
+		// Display current user balance
+		this.addCurrUserBalance(panel);
+		
+		// Display recent transactions
+		this.addRecentUserTransactions(this.mainPanel, this.currentUser, REC_TRANS_TO_DISP);
+		
+		// Add buttons for each of the user options
+		this.addMainMenuOptions(this.mainPanel);
+	}
+	
+	/** Adds the current user's balance to the parameter panel. 
+	 * @requires currentUser must be non-null
+	 */
+	private void addCurrUserBalance(JPanel panel) {
+		String balance = String.format("%-12.2f", this.currentUser.getUserBalance());
+		
+		JPanel userBalance = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		
+		userBalance.add(new JLabel("Current balance: $" + balance 
+				+  " (as of " + LocalDateTime.now() + ")"));
+		panel.add(userBalance);
+	}
+	
+	/**
+	 * Adds recent transactions of a specific user to the parameter panel.
+	 * @param panel THe JPanel which will have recent user transactions added to it.
+	 * @param user The user whose recent transactions will be displayed.
+	 * @param numOfTransactions The number of recent transactions to be displayed.
+	 */
+	private void addRecentUserTransactions(JPanel panel, User user, int numOfTransactions) {
+		JPanel transactions = new JPanel();
+		transactions.setLayout(new BoxLayout(transactions, BoxLayout.PAGE_AXIS));
+		
+		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		String header = String.format("%-30s%-14s%-12s%-20s%-30s", "Location", "Amount", "Date", 
+				"Memo", "Category");
+		headerPanel.add(new JLabel(header));
+		transactions.add(headerPanel);
+		
+		Transaction[] recentTrans = this.db.getRecentTransactions(user, numOfTransactions);
+		
+		for (int i = 0; i < recentTrans.length; i++) {
+			JPanel currTransPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			currTransPanel.add(new JLabel(recentTrans[i].toString()));
+			transactions.add(currTransPanel);
+		}
+		
+		panel.add(transactions);
+	}
+	
+	/** Adds main menu options to the parameter panel. */
+	private void addMainMenuOptions(JPanel panel) {
+		String option1 = "Add a new transaction";
+		String option2 = "Show transacton history";
+		String option3 = "User settings";
+		String option4 = "Program settings";
+		
+		GridLayout grid = new GridLayout(2, 2);
+		JPanel buttons = new JPanel(grid);
+		
+		buttons.add(new JButton(option1));
+		buttons.add(new JButton(option2));
+		buttons.add(new JButton(option3));
+		buttons.add(new JButton(option4));
+		
+		panel.add(buttons);
 	}
 }
