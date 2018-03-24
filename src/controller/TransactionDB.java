@@ -22,9 +22,9 @@ public class TransactionDB {
 	private PreparedStatement beginTxnStmt;
 	private PreparedStatement commitTxnStmt;
 	private PreparedStatement abortTxnStmt;
-    
-    /** Opens a connection with the TransactionsTracker database **/
-    public void open() {
+	
+    /** Opens a connection with a TransactionsTracker database **/
+	public TransactionDB(String filename) {
         try {
         	Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(
@@ -40,7 +40,7 @@ public class TransactionDB {
 			System.out.println("Error establishing connection, please see log file.");
 			System.exit(1);
 		}
-    }
+	}
     
     /** Closes the connection to the database. */
     public void close() throws SQLException {

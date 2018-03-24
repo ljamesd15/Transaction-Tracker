@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.sql.SQLException;
 
 import javax.swing.BoxLayout;
@@ -40,6 +41,7 @@ public class TransactionTracker {
 	// Main GUI frame
 	private JFrame mainFrame;
 	
+	/** Create a new GUI Transaction Tracker application */
 	private TransactionTracker(TransactionDB db) {
 		this.db = db;
 	}
@@ -50,8 +52,8 @@ public class TransactionTracker {
 	 * @throws SQLException
 	 */
 	public static void main(String args[]) throws SQLException {
-		TransactionDB db = new TransactionDB();
-	    db.open();
+		String dbFilePath = (new File("")).getAbsolutePath() + "\\data\\TT.db";
+		TransactionDB db = new TransactionDB(dbFilePath);
 	      
 	    try {
 	    	//db.prepare();
@@ -67,10 +69,20 @@ public class TransactionTracker {
 	 * Runs the Transaction Tracker GUI
 	 */
 	private void run() {
+		// Set up GUI
 		JPanel panel = intialiseFrame();
 		addTitle(panel);
 		addSignUpArea(panel);
 		addSignInArea(panel);
+		
+		this.mainFrame.pack();
+		this.mainFrame.setVisible(true);
+		
+		boolean keepGoing = true;
+		
+		while (keepGoing) {
+			
+		}
 	}
 	
 	/**

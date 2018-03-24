@@ -1,5 +1,6 @@
 package view;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -32,8 +33,8 @@ public class TransactionsTrackerApp {
 	
 	/** Entry point for the text user interface */
 	public static void main(String[] args) throws SQLException {
-		TransactionDB db = new TransactionDB();
-	    db.open();
+		String dbFilePath = (new File("")).getAbsolutePath() + "\\data\\TT.db";
+		TransactionDB db = new TransactionDB(dbFilePath);
 	      
 	    try {
 	    	//db.prepare();
