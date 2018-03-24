@@ -38,8 +38,9 @@ public class TransactionTracker {
 	// Currently logged in user
 	private User currentUser;
 	
-	// Main GUI frame
+	// Main GUI frame & panel
 	private JFrame mainFrame;
+	private JPanel mainPanel;
 	
 	/** Create a new GUI Transaction Tracker application */
 	private TransactionTracker(TransactionDB db) {
@@ -69,41 +70,43 @@ public class TransactionTracker {
 	 * Runs the Transaction Tracker GUI
 	 */
 	private void run() {
-		// Set up GUI
-		JPanel panel = intialiseFrame();
-		addTitle(panel);
-		addSignUpArea(panel);
-		addSignInArea(panel);
-		
-		this.mainFrame.pack();
-		this.mainFrame.setVisible(true);
-		
+		this.intialiseFrame();
 		boolean keepGoing = true;
 		
 		while (keepGoing) {
+			this.createNewMainPanel();
 			
+			if (this.currentUser == null) {
+				// Set up log in page
+				this.addTitle(this.mainPanel);
+				this.addSignUpArea(this.mainPanel);
+				this.addSignInArea(this.mainPanel);
+			} else {
+				// We have a logged in user
+				
+			}
+			
+			
+			this.mainFrame.setVisible(true);
 		}
 	}
 	
-	/**
-	 * Creates a main GUI frame and sets mainFrame class variable
-	 * @return The largest JPanel in the mainFrame.
-	 */
-	private JPanel intialiseFrame() {
-		JFrame frame = new JFrame("Transaction Tracker");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	/** Creates a main GUI frame, sets mainFrame and sets mainPanel class variables. */
+	private void intialiseFrame() {
+		this.mainFrame = new JFrame("Transaction Tracker");
+		this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.mainFrame.setSize(500, 500);
 		UIManager.put("Label.font", appFont);
 		UIManager.put("Button.font", appFont);
-		SwingUtilities.updateComponentTreeUI(frame);
-		
-		Container c = frame.getContentPane();
-		JPanel panelOfPanels = new JPanel();
-		panelOfPanels.setLayout(new BoxLayout(panelOfPanels, BoxLayout.PAGE_AXIS));
-		c.add(panelOfPanels);
-		
-		frame.setSize(500, 500);
-		this.mainFrame = frame;
-		return panelOfPanels;
+		SwingUtilities.updateComponentTreeUI(this.mainFrame);
+	}
+	
+	/** Creates a fresh mainPanel, the largest panel in mainFrame. */
+	private void createNewMainPanel() {
+		Container c = this.mainFrame.getContentPane();
+		this.mainPanel = new JPanel();
+		this.mainPanel.setLayout(new BoxLayout(this.mainPanel, BoxLayout.PAGE_AXIS));
+		c.add(this.mainPanel);
 	}
 	
 	/**
@@ -124,7 +127,16 @@ public class TransactionTracker {
 	 * @param panel is JPanel which will have a sign-up panel added to it.
 	 */
 	private void addSignUpArea(JPanel panel) {
+		JPanel signUp = new JPanel();
+		signUp.setLayout(new BoxLayout(signUp, BoxLayout.PAGE_AXIS));
 		
+		signUp.add((new JPanel(new FlowLayout(FlowLayout.LEFT)).add(
+				new JLabel("Don't have an account?"))));
+		signUp.add((new JPanel(new FlowLayout(FlowLayout.LEFT)).add(new JButton("Sign up"))));
+		
+		JPanel outerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		outerPanel.add(signUp);
+		panel.add(outerPanel);
 	}
 	
 	/**
