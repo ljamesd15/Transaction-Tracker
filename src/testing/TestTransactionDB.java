@@ -31,6 +31,6 @@ public class TestTransactionDB {
 		
 		for (int i = 0; i < num; i++) {
 			System.out.println(trans[i]);
-		}
+		}		
 	}
 }

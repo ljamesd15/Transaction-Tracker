@@ -1,11 +1,15 @@
 package gui;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -72,6 +76,21 @@ public class TransactionTracker {
 	 */
 	private void run() {
 		this.intialiseFrame();
+		
+		// Close the db when the mainFrame is closed.
+		this.mainFrame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				try {
+					db.close();
+				} catch (SQLException ex) {
+					TransactionHelper.printErrorToLog(ex);
+					e.getWindow().dispose();
+				}
+				
+			}
+		});
+		
 		this.createNewMainPanel();
 		this.createWelcomePage(this.mainPanel, false);
 		this.mainFrame.setVisible(true);
@@ -87,7 +106,7 @@ public class TransactionTracker {
 		SwingUtilities.updateComponentTreeUI(this.mainFrame);
 	}
 	
-	/** Creates a fresh mainPanel, the largest panel in mainFrame. */
+	/** Creates a fresh mainPanel with a box layout, the largest panel in mainFrame. */
 	private void createNewMainPanel() {
 		Container c = this.mainFrame.getContentPane();
 		if (this.mainPanel != null) {
@@ -113,16 +132,7 @@ public class TransactionTracker {
 		panel.add(greeting);
 		
 		// Add sign up area
-		JPanel signUp = new JPanel();
-		signUp.setLayout(new BoxLayout(signUp, BoxLayout.PAGE_AXIS));
-		
-		signUp.add((new JPanel(new FlowLayout(FlowLayout.LEFT)).add(
-				new JLabel("Don't have an account?"))));
-		signUp.add((new JPanel(new FlowLayout(FlowLayout.LEFT)).add(new JButton("Sign up"))));
-		
-		JPanel outerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		outerPanel.add(signUp);
-		panel.add(outerPanel);
+		this.addSignUpField(this.mainPanel);
 
 		// Add sign in area
 		this.addSignInField(panel, invalidSignIn);
@@ -135,6 +145,191 @@ public class TransactionTracker {
 		titleLabel.setFont(titleFont);
 		title.add(titleLabel);
 		panel.add(title);
+	}
+	
+	/** Adds a sign up field to the parameter panel. */
+	private void addSignUpField(JPanel panel) {
+		JPanel signUp = new JPanel();
+		signUp.setLayout(new BoxLayout(signUp, BoxLayout.PAGE_AXIS));
+		
+		signUp.add((new JPanel(new FlowLayout(FlowLayout.LEFT)).add(
+				new JLabel("Don't have an account?"))));
+		
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JButton signUpButton = new JButton("Sign up");
+		signUpButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createNewMainPanel();
+				createSignUpPage(mainPanel);
+				mainFrame.revalidate();
+			}
+			
+		});
+		
+		buttonPanel.add(signUpButton);
+		
+		signUp.add(buttonPanel);
+		JPanel outerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		outerPanel.add(signUp);
+		panel.add(outerPanel);
+	}
+	
+	/** Creates a sign up page on the parameter panel. */
+	private void createSignUpPage(JPanel panel) {
+		
+		this.addTitle(panel);
+		
+		// Get the desired user name
+		JPanel usernamePanel = this.createSignUpUsername(null);
+		panel.add(usernamePanel);
+		
+		// Get the user's full name
+		JPanel fullNamePanel = this.createSignUpFullName(null);
+		panel.add(fullNamePanel);
+		
+		// Get the user desired password
+		JPanel passwordPanel = this.createSignUpPassword();
+		panel.add(passwordPanel);
+		
+		// Confirm the user has typed in the password correctly.
+		JPanel confirmPasswordPanel = this.createSignUpPassword();
+		panel.add(confirmPasswordPanel);
+		
+		// Button to create the account
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JButton signUp = new JButton("Create account");
+		signUp.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Get text and password fields
+				JTextField username = getTextField(usernamePanel);
+				JTextField fullName = getTextField(fullNamePanel);
+				JPasswordField password = getPasswordField(passwordPanel);
+				JPasswordField confirmedPassword = getPasswordField(confirmPasswordPanel);
+				
+				// Get the values from the text fields
+				String usernameStr = username.getText();
+				String fullNameStr = fullName.getText();
+				char[] passwordStr = password.getPassword();
+				char[] confirmedPasswordStr = confirmedPassword.getPassword();
+				
+							
+				// Compare the two passwords
+				boolean passwordsMatch = true;	
+				for (int i = 0; i < passwordStr.length; i++) {
+					passwordsMatch = passwordsMatch && passwordStr[i] == confirmedPasswordStr[i];
+				}
+				
+				// Get hashed password
+				String pass = BCrypt.hashpw(passwordStr.toString(), BCrypt.gensalt());
+				
+				// Clear password char arrays
+				for (int i = 0; i < passwordStr.length; i++) {
+					passwordStr[i] = 0;
+				}
+				for (int i = 0; i < confirmedPasswordStr.length; i++) {
+					confirmedPasswordStr[i] = 0;
+				}
+				
+				// Remove previous error messages
+				panel.removeAll();
+				panel.add(createSignUpUsername(null));
+				panel.add(createSignUpFullName(null));
+				panel.add(createSignUpPassword());
+				panel.add(createSignUpPassword());
+				
+				if (!passwordsMatch) {
+					// Alert user of passwords not matching
+					password.setText("");
+					confirmedPassword.setText("");
+					
+					JLabel message = new JLabel("Passwords do not match.");
+					message.setForeground(Color.RED);
+					((Container)(panel.getComponent(3))).add(message);
+					
+				} else if (db.isUsernameTaken(usernameStr) || usernameStr.equals("") 
+						|| usernameStr == null) {
+					// If its null then set it to an empty string for the method call
+					if (usernameStr == null) {
+						usernameStr = "";
+					}
+					
+				} else {
+					// Everything is good
+				}
+				
+				mainFrame.revalidate();
+			}
+			
+		});
+		buttonPanel.add(signUp);
+		panel.add(buttonPanel);
+	}
+	
+	/** Creates and returns a JPanel which will contain the sign up user name field. 
+	 * @param username Text which will be initially displayed in the user name text box. Pass null
+	 * if you wish to have nothing displayed.
+	 */
+	private JPanel createSignUpUsername(String username) {
+		JPanel usernamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		usernamePanel.add(new JLabel("Username"));
+		if (username != null) {
+			usernamePanel.add(new JTextField(username, 20));
+		} else {
+			usernamePanel.add(new JTextField(20));
+		}
+		return usernamePanel;
+	}
+	
+	/**
+	 * Creates and returns a JPanel which will contain the sign up full name field.
+	 * @param fullName Text which will be initially displayed in the user name text box. Pass null
+	 * if you wish to have nothing displayed.
+	 */
+	private JPanel createSignUpFullName(String fullName) {
+		JPanel fullNamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		fullNamePanel.add(new JLabel("Full name"));
+		if (fullName != null) {
+			fullNamePanel.add(new JTextField(fullName, 20));
+		} else {
+			fullNamePanel.add(new JTextField(20));
+		}
+		return fullNamePanel;
+	}
+	
+	/** Creates and returns a JPanel which will contain the sign up password field. */
+	private JPanel createSignUpPassword() {
+		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		passwordPanel.add(new JLabel("Confirm password"));
+		passwordPanel.add(new JPasswordField(20));
+		return passwordPanel;
+	}
+	
+	/** Gets the only JTextField from the parameter panel. 
+	 * @return A JTextField from panel, null if there is no JTextField.
+	 */
+	private JTextField getTextField(JPanel panel) {
+		for (Component comp : panel.getComponents()) {
+			if (comp.getClass().equals(JTextField.class)) {
+				return (JTextField) comp;
+			}
+		}
+		return null;
+	}
+	
+	/** Gets the only JPasswordField from the parameter panel. 
+	 * @return A JPasswordField from panel, null if there is no JPasswordField.
+	 */
+	private JPasswordField getPasswordField(JPanel panel) {
+		for (Component comp : panel.getComponents()) {
+			if (comp.getClass().equals(JPasswordField.class)) {
+				return (JPasswordField) comp;
+			}
+		}
+		return null;
 	}
 	
 	/** Adds a sign in field to the parameter panel. 
@@ -173,7 +368,7 @@ public class TransactionTracker {
 		// Password text box
 		JPanel password = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		password.add(new JLabel("Password "));
-		JTextField passwordField = new JPasswordField(20);
+		JPasswordField passwordField = new JPasswordField(20);
 		password.add(passwordField);
 		userFields.add(password);
 		
@@ -183,10 +378,15 @@ public class TransactionTracker {
 		signInButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String password = passwordField.getText();
+				char[] password = passwordField.getPassword();
 				passwordField.setText("");
 				String username = usernameField.getText();
-				User loggedInUser = signIn(username, password);
+				User loggedInUser = signIn(username, password.toString());
+				
+				// Clear password array
+				for (int i = 0; i < password.length; i++) {
+					password[i] = 0;
+				}
 				
 				if (loggedInUser == null) {
 					// Incorrect log-in attempt
