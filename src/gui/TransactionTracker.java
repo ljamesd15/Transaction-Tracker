@@ -1,7 +1,6 @@
 package gui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -40,7 +39,14 @@ public class TransactionTracker {
 	private int LOGIN_ATTEMPTS_REMAINING = 5;
 	
 	// Number of recent transaction to display
-	private static final int REC_TRANS_TO_DISP = 5; 
+	private static final int REC_TRANS_TO_DISP = 5;
+	
+	// Create a new user constants
+	private static final int MAX_USERNAME_CHARS = 30;
+	private static final int MIN_USERNAME_CHARS = 1;
+	private static final int MAX_FULLNAME_CHARS = 50;
+	private static final int MAX_PASSWORD_CHARS = 30;
+	private static final int MIN_PASSWORD_CHARS = 8;
 	
 	// The Transaction-Tracker DB
 	private final TransactionDB db;
@@ -182,20 +188,71 @@ public class TransactionTracker {
 		this.addTitle(panel);
 		
 		// Get the desired user name
-		JPanel usernamePanel = this.createSignUpUsername(null);
+		JPanel usernamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		usernamePanel.add(new JLabel("Username"));
+		JTextField username = new JTextField(20);
+		usernamePanel.add(username);
+		
+		// Add two user name related error messages and make initially invisible
+		JLabel usernameTakenMessage = new JLabel("Username is taken.");
+		JLabel usernameMessage = new JLabel("Username must be greater than " + MIN_USERNAME_CHARS 
+				+ " and less than " + MAX_USERNAME_CHARS + " characters long.");
+		usernameTakenMessage.setForeground(Color.RED);
+		usernameMessage.setForeground(Color.RED);
+		usernamePanel.add(usernameTakenMessage);
+		usernamePanel.add(usernameMessage);
+		usernameMessage.setVisible(false);
+		usernameTakenMessage.setVisible(false);
+		
 		panel.add(usernamePanel);
 		
+		
 		// Get the user's full name
-		JPanel fullNamePanel = this.createSignUpFullName(null);
+		JPanel fullNamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		fullNamePanel.add(new JLabel("Full name"));
+		JTextField fullName = new JTextField(20);
+		fullNamePanel.add(fullName);
+		
+		// Add full name length error message and set invisible
+		JLabel fullNameMessage = new JLabel("Your name must be less than " + MAX_FULLNAME_CHARS 
+				+ " characters.");
+		fullNameMessage.setForeground(Color.RED);
+		fullNamePanel.add(fullNameMessage);
+		fullNameMessage.setVisible(false);
+		
 		panel.add(fullNamePanel);
 		
+		
 		// Get the user desired password
-		JPanel passwordPanel = this.createSignUpPassword();
+		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		passwordPanel.add(new JLabel("Password"));
+		JPasswordField password = new JPasswordField(20);
+		passwordPanel.add(password);
+		
+		// Add password length error message and set invisible
+		JLabel passwordMessage = new JLabel("Password must be between " + MIN_PASSWORD_CHARS 
+				+ " - " + MAX_PASSWORD_CHARS + " characters.");
+		passwordPanel.add(passwordMessage);
+		passwordMessage.setForeground(Color.RED);
+		passwordMessage.setVisible(false);
+		
 		panel.add(passwordPanel);
 		
+		
 		// Confirm the user has typed in the password correctly.
-		JPanel confirmPasswordPanel = this.createSignUpPassword();
+		JPanel confirmPasswordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		confirmPasswordPanel.add(new JLabel("Confirm password"));
+		JPasswordField confirmedPassword = new JPasswordField(20);
+		confirmPasswordPanel.add(confirmedPassword);
+		
+		// Add password matching error message, set invisible.
+		JLabel confirmedMessage = new JLabel("Passwords do not match.");
+		confirmPasswordPanel.add(confirmedMessage);
+		confirmedMessage.setForeground(Color.RED);
+		confirmedMessage.setVisible(false);
+		
 		panel.add(confirmPasswordPanel);
+		
 		
 		// Button to create the account
 		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -203,62 +260,75 @@ public class TransactionTracker {
 		signUp.addActionListener(new ActionListener() {
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Get text and password fields
-				JTextField username = getTextField(usernamePanel);
-				JTextField fullName = getTextField(fullNamePanel);
-				JPasswordField password = getPasswordField(passwordPanel);
-				JPasswordField confirmedPassword = getPasswordField(confirmPasswordPanel);
-				
+			public void actionPerformed(ActionEvent e) {				
 				// Get the values from the text fields
 				String usernameStr = username.getText();
 				String fullNameStr = fullName.getText();
-				char[] passwordStr = password.getPassword();
-				char[] confirmedPasswordStr = confirmedPassword.getPassword();
-				
-							
-				// Compare the two passwords
-				boolean passwordsMatch = true;	
-				for (int i = 0; i < passwordStr.length; i++) {
-					passwordsMatch = passwordsMatch && passwordStr[i] == confirmedPasswordStr[i];
-				}
+				char[] passwordArr = password.getPassword();
+				char[] confirmedPasswordArr = confirmedPassword.getPassword();
+				password.setText("");
+				confirmedPassword.setText("");
 				
 				// Get hashed password
-				String pass = BCrypt.hashpw(passwordStr.toString(), BCrypt.gensalt());
+				String pass = BCrypt.hashpw(passwordArr.toString(), BCrypt.gensalt());
 				
-				// Clear password char arrays
-				for (int i = 0; i < passwordStr.length; i++) {
-					passwordStr[i] = 0;
+				// Compare the two passwords and clear passwordArr
+				boolean passwordsMatch = passwordArr.length == confirmedPasswordArr.length;	
+				for (int i = 0; i < Math.min(passwordArr.length, 
+						confirmedPasswordArr.length); i++) {
+					passwordsMatch = passwordsMatch && passwordArr[i] == confirmedPasswordArr[i];
+					passwordArr[i] = 0;
 				}
-				for (int i = 0; i < confirmedPasswordStr.length; i++) {
-					confirmedPasswordStr[i] = 0;
+
+				// Clear confirmedPasswordArr
+				for (int i = 0; i < confirmedPasswordArr.length; i++) {
+					confirmedPasswordArr[i] = 0;
 				}
 				
-				// Remove previous error messages
-				panel.removeAll();
-				panel.add(createSignUpUsername(null));
-				panel.add(createSignUpFullName(null));
-				panel.add(createSignUpPassword());
-				panel.add(createSignUpPassword());
+				// Remove all previous error messages
+				usernameTakenMessage.setVisible(false);
+				usernameMessage.setVisible(false);
+				fullNameMessage.setVisible(false);
+				passwordMessage.setVisible(false);
+				confirmedMessage.setVisible(false);
 				
-				if (!passwordsMatch) {
-					// Alert user of passwords not matching
-					password.setText("");
-					confirmedPassword.setText("");
+				if (db.isUsernameTaken(usernameStr)) {
+					usernameTakenMessage.setVisible(true);
 					
-					JLabel message = new JLabel("Passwords do not match.");
-					message.setForeground(Color.RED);
-					((Container)(panel.getComponent(3))).add(message);
+				} else if (usernameStr.length() > MAX_USERNAME_CHARS 
+						|| usernameStr.length() < MIN_USERNAME_CHARS) {
+					usernameMessage.setVisible(true);
 					
-				} else if (db.isUsernameTaken(usernameStr) || usernameStr.equals("") 
-						|| usernameStr == null) {
-					// If its null then set it to an empty string for the method call
-					if (usernameStr == null) {
-						usernameStr = "";
-					}
+				} else if (fullNameStr.length() > MAX_FULLNAME_CHARS) {
+					fullNameMessage.setVisible(true);
+					
+				} else if (passwordArr.length > MAX_PASSWORD_CHARS 
+						|| passwordArr.length < MIN_PASSWORD_CHARS) {
+					passwordMessage.setVisible(true);
+					
+				} else if (!passwordsMatch) {
+					confirmedMessage.setVisible(true);
 					
 				} else {
-					// Everything is good
+					// No errors
+					User newUser = new User(usernameStr, fullNameStr, 0.0, pass);
+					boolean added = db.addNewUser(newUser);
+					
+					createNewMainPanel();
+					createWelcomePage(mainPanel, false);
+					
+					JPanel response = new JPanel(new FlowLayout(FlowLayout.CENTER));
+					JLabel message = new JLabel();
+					message.setFont(new Font(Font.SERIF, Font.BOLD, 16));
+					response.add(message);
+					mainPanel.add(response);
+					
+					if (added) {
+						message.setText("Successfully added user.");
+					} else {
+						// User was unable to be added to the db
+						message.setText("Unable to add user, please try again later.");
+					}
 				}
 				
 				mainFrame.revalidate();
@@ -267,69 +337,6 @@ public class TransactionTracker {
 		});
 		buttonPanel.add(signUp);
 		panel.add(buttonPanel);
-	}
-	
-	/** Creates and returns a JPanel which will contain the sign up user name field. 
-	 * @param username Text which will be initially displayed in the user name text box. Pass null
-	 * if you wish to have nothing displayed.
-	 */
-	private JPanel createSignUpUsername(String username) {
-		JPanel usernamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		usernamePanel.add(new JLabel("Username"));
-		if (username != null) {
-			usernamePanel.add(new JTextField(username, 20));
-		} else {
-			usernamePanel.add(new JTextField(20));
-		}
-		return usernamePanel;
-	}
-	
-	/**
-	 * Creates and returns a JPanel which will contain the sign up full name field.
-	 * @param fullName Text which will be initially displayed in the user name text box. Pass null
-	 * if you wish to have nothing displayed.
-	 */
-	private JPanel createSignUpFullName(String fullName) {
-		JPanel fullNamePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		fullNamePanel.add(new JLabel("Full name"));
-		if (fullName != null) {
-			fullNamePanel.add(new JTextField(fullName, 20));
-		} else {
-			fullNamePanel.add(new JTextField(20));
-		}
-		return fullNamePanel;
-	}
-	
-	/** Creates and returns a JPanel which will contain the sign up password field. */
-	private JPanel createSignUpPassword() {
-		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		passwordPanel.add(new JLabel("Confirm password"));
-		passwordPanel.add(new JPasswordField(20));
-		return passwordPanel;
-	}
-	
-	/** Gets the only JTextField from the parameter panel. 
-	 * @return A JTextField from panel, null if there is no JTextField.
-	 */
-	private JTextField getTextField(JPanel panel) {
-		for (Component comp : panel.getComponents()) {
-			if (comp.getClass().equals(JTextField.class)) {
-				return (JTextField) comp;
-			}
-		}
-		return null;
-	}
-	
-	/** Gets the only JPasswordField from the parameter panel. 
-	 * @return A JPasswordField from panel, null if there is no JPasswordField.
-	 */
-	private JPasswordField getPasswordField(JPanel panel) {
-		for (Component comp : panel.getComponents()) {
-			if (comp.getClass().equals(JPasswordField.class)) {
-				return (JPasswordField) comp;
-			}
-		}
-		return null;
 	}
 	
 	/** Adds a sign in field to the parameter panel. 
