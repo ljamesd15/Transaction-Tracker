@@ -32,7 +32,7 @@ public class TransactionDB {
         try {
         	Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(
-					 "jdbc:sqlite:" + TransactionHelper.FILEPATH + "\\data\\TT.db");
+					 "jdbc:sqlite:" + filename);
 			
 			// Set up the transaction start, commit, and roll back statements
 		    beginTxnStmt = this.conn.prepareStatement("BEGIN TRANSACTION;");

@@ -33,12 +33,12 @@ public class TransactionsTrackerApp {
 	
 	/** Entry point for the text user interface */
 	public static void main(String[] args) throws SQLException {
-		String dbFilePath = (new File("")).getAbsolutePath() + "\\data\\TT.db";
+    	TransactionHelper.prepare();
+		String dbFilePath = (new File("")).getAbsolutePath() + "\\src\\model\\TT.db";
 		TransactionDB db = new TransactionDB(dbFilePath);
 	      
 	    try {
 	    	//db.prepare();
-	    	TransactionHelper.prepare();
 	    	TransactionsTrackerApp app = new TransactionsTrackerApp(db);
 	    	app.run();
 	    } finally {

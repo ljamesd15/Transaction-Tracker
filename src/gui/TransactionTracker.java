@@ -69,10 +69,9 @@ public class TransactionTracker {
 	 * @throws SQLException
 	 */
 	public static void main(String args[]) throws SQLException {
-		String dbFilePath = (new File("")).getAbsolutePath() + "\\data\\TT.db";
-		TransactionDB db = new TransactionDB(dbFilePath);
-	      
     	TransactionHelper.prepare();
+		String dbFilePath = (new File("")).getAbsolutePath() + "\\src\\model\\TT.db";
+		TransactionDB db = new TransactionDB(dbFilePath);
     	TransactionTracker app = new TransactionTracker(db);
     	app.run();
 	}

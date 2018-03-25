@@ -295,3 +295,40 @@ java.sql.SQLException: ResultSet is TYPE_FORWARD_ONLY
 	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:460)
 	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:206)
 
+!SESSION 2018-03-25 13:50:01.421
+!MESSAGE [SQLITE_ERROR] SQL error or missing database (no such table: Users)
+!STACK TRACE
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such table: Users)
+	at org.sqlite.core.DB.newSQLException(DB.java:909)
+	at org.sqlite.core.DB.newSQLException(DB.java:921)
+	at org.sqlite.core.DB.throwex(DB.java:886)
+	at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+	at org.sqlite.core.NativeDB.prepare(NativeDB.java:127)
+	at org.sqlite.core.DB.prepare(DB.java:227)
+	at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:41)
+	at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:30)
+	at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:19)
+	at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:48)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:263)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:235)
+	at controller.TransactionDB.logIn(TransactionDB.java:160)
+	at view.TransactionsTrackerApp.login(TransactionsTrackerApp.java:169)
+	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:79)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:43)
+
+!SESSION 2018-03-25 13:53:06.978
+!MESSAGE path to 'C:\Users\ljame\git\Transaction-Tracker\model\TT.db': 'C:\Users\ljame\git\Transaction-Tracker\model' does not exist
+!STACK TRACE
+java.sql.SQLException: path to 'C:\Users\ljame\git\Transaction-Tracker\model\TT.db': 'C:\Users\ljame\git\Transaction-Tracker\model' does not exist
+	at org.sqlite.core.CoreConnection.open(CoreConnection.java:192)
+	at org.sqlite.core.CoreConnection.<init>(CoreConnection.java:76)
+	at org.sqlite.jdbc3.JDBC3Connection.<init>(JDBC3Connection.java:25)
+	at org.sqlite.jdbc4.JDBC4Connection.<init>(JDBC4Connection.java:24)
+	at org.sqlite.SQLiteConnection.<init>(SQLiteConnection.java:45)
+	at org.sqlite.JDBC.createConnection(JDBC.java:114)
+	at org.sqlite.JDBC.connect(JDBC.java:88)
+	at java.sql.DriverManager.getConnection(DriverManager.java:664)
+	at java.sql.DriverManager.getConnection(DriverManager.java:270)
+	at controller.TransactionDB.<init>(TransactionDB.java:34)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:38)
+
