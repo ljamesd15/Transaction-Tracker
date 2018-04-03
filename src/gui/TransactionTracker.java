@@ -387,7 +387,7 @@ public class TransactionTracker {
 				char[] password = passwordField.getPassword();
 				passwordField.setText("");
 				String username = usernameField.getText();
-				User loggedInUser = signIn(username, password.toString());
+				User loggedInUser = signIn(username, password);
 				
 				// Clear password array
 				for (int i = 0; i < password.length; i++) {
@@ -430,13 +430,13 @@ public class TransactionTracker {
 	 * @param password is the password of the user attempted to be logged in
 	 * @return The user object who is now logged in.
 	 */
-	private User signIn(String username, String password) {
+	private User signIn(String username, char[] password) {
 		User u = this.db.logIn(username);
 		
 		if (u == null) {
 			return null;
 		} else {
-			return BCrypt.checkpw(password, u.getPassword()) ? u : null;
+			return BCrypt.checkpw(new String(password), u.getPassword()) ? u : null;
 		}
 	}
 	
