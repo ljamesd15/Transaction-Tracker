@@ -1,17 +1,38 @@
 # Transactions-Tracker
 An independent side project where users can monitor their both incoming and outgoing transactions.
-	
-This program, using SQLite, stores user information, user transactions, user preferences, and 
-program preferences. The database securely stores user password with BCrypt and more information
-encryption to come. A user, through a text interface, can create a new account, log in and out of 
-their current account, check their current balance, add new transactions, edit user and program 
-settings, and soon will be able to see a breakdown of their transactions. Users can use 
-Transactions Tracker to monitor their expenses and see how much they are spending in certain 
-categories, at certain locations, and much much more. Transactions Tracker allows users to become 
-more fiscally responsible and aware of where money is both coming in from and more importantly 
-where it is going to.
 
-PATCH NOTES
+General:
+There are two (soon to be 3) versions of Transaction Tracker. First there is a text-based interface
+with the user, there is a GUI, and soon to be a web application all supporting the same features. 
+In all three cases the program interacts with a SQLite database which stores all of the user
+information. This project was built from the ground up with security in mind. Passwords are
+hashed immediately with a salt using BCrypt which is based on the Blowfish cipher. In addition
+to incorporating a salt BCrypt is an adaptive function to prevent a classic brute force search
+for a user's password.
+
+Text-based interface:
+This program allows users to create accounts, store transactions, lookup past transactions and much
+more. Each transaction has a location, amount, date, category and optional memo. Users can change
+their full name and password along with adding personalized categories which fit their spending 
+habits. In addition to keeping all transactions (both withdrawals and deposits) in one central 
+application users can look at their balance and breakdown their transaction history in a myriad of
+ways. Users can use the Transaction Tracker application to become more fiscally responsible by 
+monitoring not only how much money is coming in but more importantly when and where it is going to!
+
+GUI:
+This GUI will soon support all the functionality of its text based counterpart in addition to 
+a more visual breakdown of a user's transaction history. This GUI also has a few features which
+are not currently present in the text interface such as 'Remember me' option to allow the user
+to have the program remember their user name upon startup and the display upon login of the user's
+recent few transactions.
+
+Web application:
+Coming soon, please stay tuned.
+
+UPDATE NOTES
+
+v 1.4.00 Added a GUI so users don't need to interact with a text based version of Transaction 
+	Tracker. Not all features have been implemented yet but they are coming soon. (4/3/2018)
 
 v 1.3.21 Default categories for new databases have been reduced to only "N/A". Made database
 	transactions follow ACID properties with commits and roll backs. (1/30/18)

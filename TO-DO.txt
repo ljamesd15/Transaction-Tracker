@@ -1,15 +1,33 @@
 TO DO LIST: 
 
-- Specification tests -- User (user name taken, user name/name/password too long, password too short)
-						 Transactions (location/memo too long, invalid number for category, not logged in)
-						 Main menu (invalid number, non-number input)
-						 Settings (not logged in, category name too long, category already exists)
+-- GUI
+	Adding a transaction
+	Ability to go back to previous page
+	Remember me option
+	Notify user of error in GUI rather than printing to console.
+	Program options : show history (graphs/charts)
 
-- Program options : show history (non-graphic, no charts just text based)
 
-- Encrypt user balance, user name and all transaction information to and from database
+-- Web
+	Create a web application of TT (link to same database), Summer 2018
 
-- Create a web application for TT (Summer)
 
-- GUI (ability to go back at any point, remember me option to store user info to prevent repeated 
-log ins, new notification of error dont print to console)
+-- Text interface
+	Program options : show history (print it)
+
+
+-- Security
+	Encrypt user balance, user name, and all transaction information (Java ciphers?)
+	See if I can't add a method of BCrypt to send in a char[] instead of a string (ask prof if matters)
+
+
+-- Testing
+	All versions of TT
+		User (user name taken, user name/name/password too long, password too short)
+		Transactions (location/memo too long, invalid number for category, not logged in)
+		Settings (category name too long, category already exists)
+
+	Tests for text based interface only
+		Main menu (invalid number, non-number input)
+		Transactions (invalid number for category, not logged in)
+		Settings (not logged in)
