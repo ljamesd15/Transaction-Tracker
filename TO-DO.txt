@@ -10,6 +10,7 @@ TO DO LIST:
 
 -- Web
 	Create a web application of TT (link to same database), Summer 2018
+	Read tom cat tutorials, see if I can combine eclipse IDEs
 
 
 -- Text interface
