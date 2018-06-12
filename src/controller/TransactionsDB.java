@@ -239,7 +239,7 @@ public class TransactionsDB {
 		
 		return balance;
     }
-
+    
     /**
      * Gets the categories which are available in this program.
      * @return A list of strings containing the available categories or null if there was
@@ -285,6 +285,7 @@ public class TransactionsDB {
 	}
 	
 	/**
+<<<<<<< HEAD
 	 * Determines if a string is a category in the provided database.
 	 * @return The category with correct casing if the string parameter matches a transaction 
 	 * category otherwise returns null.
@@ -310,7 +311,7 @@ public class TransactionsDB {
 		}
 		System.out.println("and " + categories[categories.length - 1] + ".");
     }
-	
+
 	/**
 	 * Changes the full name of a user in the database.
 	 * @param user is the user whose name will be changed.

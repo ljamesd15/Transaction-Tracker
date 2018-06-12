@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 !SESSION 2018-01-02 21:53:34.655
 !MESSAGE [SQLITE_ERROR] SQL error or missing database (no such table: Users)
 !STACK TRACE
@@ -117,3 +118,5 @@ Caused by: java.text.ParseException: Unparseable date: "2018-06-01" does not mat
 	at org.sqlite.jdbc3.JDBC3ResultSet.getDate(JDBC3ResultSet.java:324)
 	... 6 more
 
+=======
+>>>>>>> branch 'showHistory' of git@github.com:ljamesd15/Transaction-Tracker.git

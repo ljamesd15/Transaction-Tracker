@@ -288,14 +288,16 @@ public class TransactionsTrackerApp {
 		}
 	}
 
-	
-	/** Allows the user to see their transaction history */
+	/** 
+	 * Allows the user to see their transaction history.
+	 * @param input is the scanner used to read user input.
+	 */
 	private void showTransactionHistory(Scanner input) {
 		if (this.currentUser == null) {
 			System.out.println("You must be logged in for this feature.");
 			return;
 		}
-		ShowHistory.run(input, this.db, this.currentUser);
+		ShowHistory.run(input, db, this.currentUser);
 	}
 	
 	/** Exits the application */
