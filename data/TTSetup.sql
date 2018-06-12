@@ -36,5 +36,6 @@ belongsTo       VARCHAR(30)     REFERENCES Users(username)
 PRIMARY KEY (description, price_in_cents, day, belongsTo)
 );
 
--- Add the not applicable category.
+-- Add basic categories.
 INSERT INTO Categories VALUES ("N/A");
+INSERT INTO Categories VALUES ("Deposit");

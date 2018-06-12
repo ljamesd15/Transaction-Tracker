@@ -127,15 +127,10 @@ class Settings {
 	 * @param input the scanner to read user input.
 	 */
 	private static void addCategory(TransactionsDB db, Scanner input) {
-		String[] categories = db.getCategories();
-
 		while (true) {
 			// Print out current categories.
 			System.out.print("Current categories are ");
-			for (int i = 0; i < categories.length - 1; i++) {
-				System.out.print(categories[i] + ", ");
-			}
-			System.out.println("and " + categories[categories.length - 1] + ".");
+			db.printCategories();
 			
 			System.out.print('\n' + "What is the name of the category you would like to add?"
 					+ '\n' + "> ");
@@ -147,18 +142,14 @@ class Settings {
 			}
 			
 			// Determine if this is a new category.
-			boolean isNewCategory = true;
-			for (int i = 0; i < categories.length; i++) {
-				if (categories[i].toLowerCase().equals(newCategory.toLowerCase())) {
-					System.out.println(categories[i] + " is already a category, "
-							+ "please pick a different new category name.");
-					isNewCategory = false;
-				}
-			}
-			
-			// If its a new category add it to the DB
-			if (isNewCategory) {
-				// Add category to DB
+			String dbCategory = db.isACategory(newCategory);
+			if (dbCategory != null) {
+				System.out.println(dbCategory + " is already a category, "
+						+ "please pick a different new category name.");
+			} else {
+				// Capitalize first letter
+				newCategory = newCategory.toUpperCase().substring(0, 1)	
+						+ newCategory.toLowerCase().substring(1, newCategory.length());
 				boolean executed = db.addCategory(newCategory);
 				
 				// Inform user of outcome.
@@ -248,7 +239,7 @@ class Settings {
 						
 			} else {
 				// Get new full name
-				String newName = UserInformation.setFullName(input);
+				String newName = CreateNewUser.setFullName(input);
 				
 				// Have DB change the user's full name
 				boolean executed = db.changeFullName(user, newName);
@@ -289,7 +280,7 @@ class Settings {
 				
 			} else {
 				// Get new password
-				String newPassword = UserInformation.setPassword(input);
+				String newPassword = CreateNewUser.setPassword(input);
 				
 				// Have DB change the user password		
 				boolean executed = db.changePassword(user, newPassword);

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 !SESSION 2018-01-02 21:53:34.655
 !MESSAGE [SQLITE_ERROR] SQL error or missing database (no such table: Users)
 !STACK TRACE
@@ -67,3 +68,55 @@ org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no suc
 	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:87)
 	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:42)
 
+!SESSION 2018-06-12 14:05:01.874
+!MESSAGE [SQLITE_ERROR] SQL error or missing database (no such column: Food)
+!STACK TRACE
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such column: Food)
+	at org.sqlite.core.DB.newSQLException(DB.java:909)
+	at org.sqlite.core.DB.newSQLException(DB.java:921)
+	at org.sqlite.core.DB.throwex(DB.java:886)
+	at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+	at org.sqlite.core.NativeDB.prepare(NativeDB.java:127)
+	at org.sqlite.core.DB.prepare(DB.java:227)
+	at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:41)
+	at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:30)
+	at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:19)
+	at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:48)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:263)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:235)
+	at controller.TransactionsDB.executeQuery(TransactionsDB.java:409)
+	at view.ShowHistory.run(ShowHistory.java:103)
+	at view.TransactionsTrackerApp.showTransactionHistory(TransactionsTrackerApp.java:298)
+	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:95)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:42)
+
+!SESSION 2018-06-12 15:18:50.153
+!MESSAGE ResultSet is TYPE_FORWARD_ONLY
+!STACK TRACE
+java.sql.SQLException: ResultSet is TYPE_FORWARD_ONLY
+	at org.sqlite.jdbc4.JDBC4ResultSet.first(JDBC4ResultSet.java:443)
+	at view.ShowHistory.outputResults(ShowHistory.java:139)
+	at view.ShowHistory.run(ShowHistory.java:72)
+	at view.TransactionsTrackerApp.showTransactionHistory(TransactionsTrackerApp.java:298)
+	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:95)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:42)
+
+!SESSION 2018-06-12 15:24:24.780
+!MESSAGE Error parsing time stamp
+!STACK TRACE
+java.sql.SQLException: Error parsing time stamp
+	at org.sqlite.jdbc3.JDBC3ResultSet.getDate(JDBC3ResultSet.java:327)
+	at org.sqlite.jdbc3.JDBC3ResultSet.getDate(JDBC3ResultSet.java:346)
+	at view.ShowHistory.outputResults(ShowHistory.java:154)
+	at view.ShowHistory.run(ShowHistory.java:72)
+	at view.TransactionsTrackerApp.showTransactionHistory(TransactionsTrackerApp.java:298)
+	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:95)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:42)
+Caused by: java.text.ParseException: Unparseable date: "2018-06-01" does not match (\p{Nd}++)\Q-\E(\p{Nd}++)\Q-\E(\p{Nd}++)\Q \E(\p{Nd}++)\Q:\E(\p{Nd}++)\Q:\E(\p{Nd}++)\Q.\E(\p{Nd}++)
+	at org.sqlite.date.FastDateParser.parse(FastDateParser.java:299)
+	at org.sqlite.date.FastDateFormat.parse(FastDateFormat.java:490)
+	at org.sqlite.jdbc3.JDBC3ResultSet.getDate(JDBC3ResultSet.java:324)
+	... 6 more
+
+=======
+>>>>>>> branch 'showHistory' of git@github.com:ljamesd15/Transaction-Tracker.git
