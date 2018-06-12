@@ -285,6 +285,33 @@ public class TransactionsDB {
 	}
 	
 	/**
+	 * Determines if a string is a category in the provided database.
+	 * @return The category with correct casing if the string parameter matches a transaction 
+	 * category otherwise returns null.
+	 */
+    public String isACategory(String category) {
+    	String[] categories = this.getCategories();
+    	
+		for (int i = 0; i < categories.length; i++) {
+			if (categories[i].equalsIgnoreCase(category)) {
+				return categories[i];
+			}
+		}
+		return null;
+    }
+    
+    /**
+     * Prints the categories one after another with a comma and space separating each one.
+     */
+    public void printCategories() {
+    	String[] categories = this.getCategories();
+		for (int i = 0; i < categories.length - 1; i++) {
+			System.out.print(categories[i] + ", ");
+		}
+		System.out.println("and " + categories[categories.length - 1] + ".");
+    }
+	
+	/**
 	 * Changes the full name of a user in the database.
 	 * @param user is the user whose name will be changed.
 	 * @param newName is the new full name of the user.
@@ -369,6 +396,21 @@ public class TransactionsDB {
 		} catch (SQLException e) {
 			TransactionHelper.printErrorToLog(e);
 			return false;
+		}
+	}
+	
+	/**
+	 * Allows a safe way to execute a query on this database by other code.
+	 * @param query The SQL statement executed.
+	 * @return The result set returned from executing the provided query.
+	 */
+	public ResultSet executeQuery(String query) {
+		try {
+			PreparedStatement stmt = this.conn.prepareStatement(query);
+			return stmt.executeQuery();
+		} catch (SQLException e) {
+			TransactionHelper.printErrorToLog(e);
+			return null;
 		}
 	}
 }

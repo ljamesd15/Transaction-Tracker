@@ -11,7 +11,7 @@ import model.User;
  * objects from user information.
  * @author L. James Davidson
  */
-abstract class UserInformation {
+abstract class CreateNewUser {
 
 	// Constants regarding the restrictions from the SQLite database tables.
 	protected static final int MAX_USERNAME_CHARS = 30;

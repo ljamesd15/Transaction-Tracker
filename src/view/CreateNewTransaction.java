@@ -18,9 +18,6 @@ abstract class CreateNewTransaction {
 	private static final int MAX_DESCR_CHARS = 20;
 	private static final int MAX_MEMO_CHARS = 20;
 	
-	// Used below to ensure transactions have occurred on or before today.
-	private static LocalDate today;
-	
 	// An array of strings containing the default user expense categories.
 	private static String[] categories;
 	
@@ -35,7 +32,6 @@ abstract class CreateNewTransaction {
 		
 		TransactionBuilder transfer = new TransactionBuilder(isDeposit);
 		categories = categoryNames;
-		today = LocalDate.now();
 		
 		// Get the description of the TransactionBuilder.
 		setDescription(input, transfer);
@@ -66,7 +62,7 @@ abstract class CreateNewTransaction {
 	 */
 	private static boolean getType(Scanner input) {
 		String question = "Was this transaction a deposit?";
-		return TransactionHelper.yesNo(input, question);
+		return TransactionHelper.yesNoQuestion(input, question);
 	}
 
 	/**
@@ -120,155 +116,19 @@ abstract class CreateNewTransaction {
 	 * @param input is the scanner used to get user input.
 	 * @param transfer is the TransactionBuilder object whose date is being set.
 	 */
-	private static void setDate(Scanner input, TransactionBuilder transfer) {
-		LocalDate date = null;
-		
-		String question = "Was the transaction made today?";
-		boolean answer = TransactionHelper.yesNo(input, question);
-		
+	private static void setDate(Scanner input, TransactionBuilder transfer) {		
 		// If the transaction occurred today then set the transaction information
-		if (answer) {
+		if (TransactionHelper.yesNoQuestion(input, "Was the transaction made today?")) {
 			transfer.setDate(LocalDate.now());
 			return;
 		}
 		
 		// If transaction was not made today then get the day the transaction was made.
 		int[] dateInfo = new int[3];
-		
-		// Get the year of the transaction.
-		setYear(input, dateInfo);
-		
-		// Get the month of the transaction.
-		setMonth(input, dateInfo);
-		
-		// Get the day of the transaction.
-		setDay(input, dateInfo);
-		
-		// Set date to the information given by the user.
-		date = LocalDate.of(dateInfo[0], dateInfo[1], dateInfo[2]);
-		transfer.setDate(date);
-	}
-	
-	/**
-	 * Gets the year that this transaction took place from the user.
-	 * @param input the scanner to read user input.
-	 * @param dateInfo is the array of integers which represent the date information 
-	 * 		for this transaction.
-	 * @modifies dateInfo[0], which is used to store the integer representing the year.
-	 */
-	private static void setYear(Scanner input, int[] dateInfo) {
-		// Get the year of the transaction.
-		while (true) {
-			System.out.print('\n' + "What year was the transaction made?" + '\n' + "> ");
-			int tempYear;
-			
-			// Ensure that the response is an integer.
-			try {
-				tempYear = Integer.parseInt(input.nextLine());
-			} catch (NumberFormatException e) {
-				System.out.println("Invalid response. Please type an integer.");
-				continue;
-			}
-			
-			// Ensure that the year is equal to or before the current year.
-			if (tempYear > today.getYear()) {
-				System.out.println("Invalid response. Please type a current or past year.");
-				continue;
-			}
-			
-			// Store the integer for the year in dateInfo
-			dateInfo[0] = tempYear;
-			break;
-		}
-	}
-	
-	/**
-	 * Gets the month that this transaction took place from the user.
-	 * @param input the scanner to read user input.
-	 * @param dateInfo is the array of integers which represent the date information 
-	 * 		for this transaction.
-	 * @modifies dateInfo[1], which is used to store the integer representing the month.
-	 */
-	private static void setMonth(Scanner input, int[] dateInfo) {
-		// Get the month of the transaction.
-		while (true) {
-			System.out.print('\n' + "What month was the transaction made?" + '\n' + "> ");
-			int tempMonth;
-			
-			// Ensure that the response is an integer.
-			try {
-				tempMonth = Integer.parseInt(input.nextLine());
-			} catch (NumberFormatException e) {
-				System.out.println("Invalid response. Please type an integer.");
-				continue;
-			}
-			
-			// Ensure the integer is a valid month integer.
-			if (tempMonth < 1 || tempMonth > 12) {
-				System.out.println("Invalid response. Please type an integer between 1 and 12.");
-				continue;
-			}
-			
-			// Ensure that the month is equal to or before the current month of this year.
-			if (dateInfo[0] == today.getYear() && tempMonth > today.getMonthValue()) {
-				System.out.println("Invalid response. Please type a current or past month of "
-						+ "this year.");
-				continue;
-
-			}
-			
-			// Store the month integer in dateInfo.
-			dateInfo[1] = tempMonth;
-			break;
-		}
-	}
-	
-	/**
-	 * Gets the day that this transaction took place from the user.
-	 * @param input the scanner to read user input.
-	 * @param dateInfo is the array of integers which represent the date information 
-	 * 		for this transaction.
-	 * @modifies dateInfo[2], which is used to store the integer representing the day.
-	 */
-	private static void setDay(Scanner input, int[] dateInfo) {
-		// Get the day of the transaction.
-		
-		// Getting the maximum number of days of the month.
-		int maxDay = LocalDate.of(dateInfo[0], dateInfo[1], 1).lengthOfMonth();
-		
-		while (true) {
-			System.out.print('\n' + "What day was the transaction made?" + '\n' + "> ");
-			int tempDay;
-			
-			// Ensure that the response is an integer.
-			try {
-				tempDay = Integer.parseInt(input.nextLine());
-			} catch (NumberFormatException e) {
-				System.out.println("Invalid response. Please type an integer.");
-				continue;
-			}
-			
-			// Ensure the integer is a valid day.
-			if (tempDay < 1 || tempDay > maxDay) {
-				System.out.println("Invalid response. Please type an integer "
-						+ "between 1 and " + maxDay + ".");
-				continue;
-			}
-			
-			// Ensure that the month is equal to or before the current month of this year.
-			if (dateInfo[0] == today.getYear() && dateInfo[1] == today.getMonthValue() 
-					&& tempDay > today.getDayOfMonth()) {
-				
-				System.out.println("Invalid response. Please type a current or past day of this"
-						+ " year.");
-				continue;
-
-			}
-		
-			// Store the day information in dateInfo
-			dateInfo[2] = tempDay;
-			break;
-		}
+		TransactionHelper.setYear(input, dateInfo, "What year was the transaction made?");
+		TransactionHelper.setMonth(input, dateInfo, "What month was the transaction made?");
+		TransactionHelper.setDay(input, dateInfo, "What day was the transaction made?");
+		transfer.setDate(LocalDate.of(dateInfo[0], dateInfo[1], dateInfo[2]));
 	}
 	
 	/**
@@ -277,6 +137,11 @@ abstract class CreateNewTransaction {
 	 * @param transfer is the TransactionBuilder object whose category is being set.
 	 */
 	private static void setCategory(Scanner input, TransactionBuilder transfer) {
+		if (transfer.isADeposit()) {
+			transfer.setCategory("Deposit");
+			return;
+		}
+		
 		while (true) {
 			System.out.print('\n' + "Avaliable categories are: ");
 			
@@ -288,7 +153,8 @@ abstract class CreateNewTransaction {
 			System.out.println((categories.length - 1) + "-" 
 					+ categories[categories.length - 1]);
 			
-			System.out.print("Please type the number corresponding to which category best fits"
+			System.out.print("(You can add more cateogries from the settings menu.) \n"
+					+ "Please type the number corresponding to which category best fits"
 					+ " this transaction." + '\n' + "> ");
 			int catNum;
 			
@@ -360,7 +226,7 @@ abstract class CreateNewTransaction {
 		
 		while (true) {	
 			String question = "Would you like to edit anything?";
-			answer = TransactionHelper.yesNo(input, question);
+			answer = TransactionHelper.yesNoQuestion(input, question);
 			
 			// If the information is not correct then have the user edit the information.
 			if (answer) {

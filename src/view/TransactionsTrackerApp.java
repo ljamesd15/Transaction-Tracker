@@ -58,13 +58,6 @@ public class TransactionsTrackerApp {
 		    System.out.print('\n' + "(Main Menu) What would you like to do?" + '\n' + "> ");
 		    response = input.nextLine().toLowerCase();
 		    
-		    // Prevent null pointer exceptions.
-		    if (response == null) {
-		    	this.unrecognisedCommand("");
-		    }
-		    
-		    // For ease of reading used switch statements to determine what the program 
-		    // should do next given a user input.
 		    switch (response) {
 		    
 		    	case "0":
@@ -99,7 +92,7 @@ public class TransactionsTrackerApp {
 		    		
 		    	case "5":
 		    		// Show transaction history
-		    		this.showTransactionHistory();
+		    		this.showTransactionHistory(input);
 		    		break;
 		    		
 		    	case "exit":
@@ -182,7 +175,6 @@ public class TransactionsTrackerApp {
 				try {
 					this.db.close();
 				} catch (SQLException e) {
-					// Print error to log file.
 					TransactionHelper.printErrorToLog(e);
 				}
 				System.exit(1);
@@ -211,7 +203,7 @@ public class TransactionsTrackerApp {
 	 */
 	private void createUser(Scanner input) {
 		System.out.println("Creating new user...");
-		User newUser = UserInformation.run(input, this.db);
+		User newUser = CreateNewUser.run(input, this.db);
 		boolean addedCorrectly = this.db.addNewUser(newUser);
 		
 		if (addedCorrectly) {
@@ -298,13 +290,12 @@ public class TransactionsTrackerApp {
 
 	
 	/** Allows the user to see their transaction history */
-	private void showTransactionHistory() {
+	private void showTransactionHistory(Scanner input) {
 		if (this.currentUser == null) {
 			System.out.println("You must be logged in for this feature.");
 			return;
 		}
-		System.out.println("This option has not yet been implemented.");
-		System.out.println("Please pick a different option.");
+		ShowHistory.run(input, this.db, this.currentUser);
 	}
 	
 	/** Exits the application */
