@@ -2,7 +2,7 @@ package view;
 
 import java.util.Scanner;
 
-import controller.TransactionsDB;
+import controller.DB;
 import model.BCrypt;
 import model.User;
 
@@ -10,158 +10,6 @@ class Settings {
 
 	// Constants regarding the restrictions from the SQLite database tables.
 	private static final int MAX_CATNAME_CHARS = 30;
-
-	/**
-	 * Allows user to access available settings.
-	 * @param db is the database whose information may be modified.
-	 * @param input the scanner used to read user input.
-	 * @param currentUser is the currently logged in user.
-	 */
-	protected static void run(TransactionsDB db, Scanner input, User currentUser) {
-		printSettingsCommands();
-		
-		// Initializing user response.
-		String response;
-		boolean keepGoing = true;
-		
-		// While a valid command has not been chosen.
-		while (keepGoing) {
-		    System.out.print('\n' + "(Settings) What would you like to do?" + '\n' + "> ");
-			response = input.nextLine().toLowerCase();
-			
-			// Cases for user input.
-			switch (response) {
-			
-				case "0":
-					// Print available options
-					printSettingsCommands();
-					break;
-					
-				case "1":
-					// Program preferences
-					programSettings(db, input);
-					break;
-				
-				case "2":
-					// User preferences
-					userSettings(db, input, currentUser);
-					break;
-					
-				case "back":
-					// Return to main menu
-					keepGoing = false;
-					break;
-					
-				default:
-					System.out.println("Unrecognised command: " + response);
-					System.out.println("Type '0' to see a list of "
-							+ "valid commands.");
-			}
-		}
-	}
-
-	/** Prints the available settings commands. */
-	private static void printSettingsCommands() {
-		System.out.println('\n' + "Settings menu commands are:" + '\n'
-				+ "'0' to get a list of settings menu commands." + '\n'
-				+ "'1' to go to program settings." + '\n'
-				+ "'2' to go to user settings." + '\n'
-				+ "'back' to return to the main menu.");
-		
-	}
-
-	/**
-	 * Allows user to access the program settings.
-	 * @param db is the database whose information may be modified.
-	 * @param input the scanner to read user input.
-	 */
-	private static void programSettings(TransactionsDB db, Scanner input) {
-		printProgramSettingsCommands();
-		
-		// Initializing user response.
-		String response;
-		boolean keepGoing = true;
-		
-		// While a valid command has not been chosen.
-		while (keepGoing) {
-		    System.out.print('\n' + "(Program Settings) What would you like to do?" + '\n' + "> ");
-			response = input.nextLine().toLowerCase();
-			
-			// Cases for user input.
-			switch (response) {
-			
-				case "0":
-					// Print available options
-					printProgramSettingsCommands();
-					break;
-					
-				case "1":
-					// Add a category
-					addCategory(db, input);
-					break;
-				
-				case "back":
-					// Return to settings menu
-					keepGoing = false;
-					break;
-				
-				default:
-					System.out.println("Unrecognised command: " + response);
-					System.out.println("Type '0' to see a list of "
-							+ "valid commands.");
-			}
-		}
-	}	
-	
-	/** Prints program settings commands. */
-	private static void printProgramSettingsCommands() {
-		System.out.println('\n' + "Program settings menu commands are:" + '\n'
-				+ "'0' to get a list of program settings menu commands." + '\n'
-				+ "'1' to add a new expense category." + '\n'
-				+ "'back' to return to the settings menu.");
-	}
-
-	/**
-	 * Adds a new expense category from user input.
-	 * @param db the database whose categories will be edited.
-	 * @param input the scanner to read user input.
-	 */
-	private static void addCategory(TransactionsDB db, Scanner input) {
-		while (true) {
-			// Print out current categories.
-			System.out.print("Current categories are ");
-			db.printCategories();
-			
-			System.out.print('\n' + "What is the name of the category you would like to add?"
-					+ '\n' + "> ");
-			String newCategory = input.nextLine();
-			
-			if (newCategory.length() > MAX_CATNAME_CHARS) {
-				System.out.println("Category names must be less than " + MAX_CATNAME_CHARS 
-						+ " characters long.");
-			}
-			
-			// Determine if this is a new category.
-			String dbCategory = db.isACategory(newCategory);
-			if (dbCategory != null) {
-				System.out.println(dbCategory + " is already a category, "
-						+ "please pick a different new category name.");
-			} else {
-				// Capitalize first letter
-				newCategory = newCategory.toUpperCase().substring(0, 1)	
-						+ newCategory.toLowerCase().substring(1, newCategory.length());
-				boolean executed = db.addCategory(newCategory);
-				
-				// Inform user of outcome.
-				if (executed) {
-					System.out.println("Successfully added category: " + newCategory);
-				} else {
-					System.out.println("Unable to add category, please try again later.");
-				}
-				break;
-			}
-		}
-	}
 	
 	/**
 	 * Allows user to access user specific settings.
@@ -169,7 +17,7 @@ class Settings {
 	 * @param input the scanner to read user input.
 	 * @param user is the user whose settings will be accessed.
 	 */
-	private static void userSettings(TransactionsDB db, Scanner input, User user) {
+	public static void run(DB db, Scanner input, User user) {
 		printUserSettingsCommands();
 		
 		// Initializing user response.
@@ -178,7 +26,7 @@ class Settings {
 		
 		// While a valid command has not been chosen.
 		while (keepGoing) {
-		    System.out.print('\n' + "(User Settings) What would you like to do?" + '\n' + "> ");
+		    System.out.print('\n' + "(Settings) What would you like to do?" + '\n' + "> ");
 			response = input.nextLine().toLowerCase();
 			
 			// Cases for user input.
@@ -197,6 +45,11 @@ class Settings {
 				case "2":
 					// Change password
 					editUserPassword(db, input, user);
+					break;
+					
+				case "3":
+					// Add a category
+					addCategory(db, input, user);
 					break;
 					
 				case "back":
@@ -218,6 +71,7 @@ class Settings {
 				+ "'0' to get a list of user settings menu commands." + '\n'
 				+ "'1' to edit the full name of a user." + '\n'
 				+ "'2' to edit the password of the user." + '\n'
+				+ "'3' to add a new expense category." + '\n'
 				+ "'back' to return to the settings menu.");
 	}
 	
@@ -227,7 +81,7 @@ class Settings {
 	 * @param user is the logged in user whose information will be edited.
 	 * @modifies The logged in user's full name.
 	 */
-	private static void editUserFullName(TransactionsDB db, Scanner input, User user) {
+	private static void editUserFullName(DB db, Scanner input, User user) {
 		
 		while (true) {
 			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
@@ -239,7 +93,7 @@ class Settings {
 						
 			} else {
 				// Get new full name
-				String newName = CreateNewUser.setFullName(input);
+				String newName = NewUser.setFullName(input);
 				
 				// Have DB change the user's full name
 				boolean executed = db.changeFullName(user, newName);
@@ -268,7 +122,7 @@ class Settings {
 	 * @param user is the logged in user whose information will be edited.
 	 * @modifies The logged in user's password.
 	 */
-	private static void editUserPassword(TransactionsDB db, Scanner input, User user) {
+	private static void editUserPassword(DB db, Scanner input, User user) {
 		
 		while (true) {
 			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
@@ -280,7 +134,7 @@ class Settings {
 				
 			} else {
 				// Get new password
-				String newPassword = CreateNewUser.setPassword(input);
+				String newPassword = NewUser.setPassword(input);
 				
 				// Have DB change the user password		
 				boolean executed = db.changePassword(user, newPassword);
@@ -297,6 +151,49 @@ class Settings {
 					System.out.println("Unable to change password, please try again later.");
 				}
 
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * Adds a new expense category from user input.
+	 * @param db the database whose categories will be edited.
+	 * @param input the scanner to read user input.
+	 * @param user The user which will get the new category.
+	 */
+	private static void addCategory(DB db, Scanner input, User user) {
+		while (true) {
+			// Print out current categories.
+			System.out.print("Current categories are ");
+			db.printCategories(user);
+			
+			System.out.print('\n' + "What is the name of the category you would like to add?"
+					+ '\n' + "> ");
+			String newCategory = input.nextLine();
+			
+			if (newCategory.length() > MAX_CATNAME_CHARS) {
+				System.out.println("Category names must be less than " + MAX_CATNAME_CHARS 
+						+ " characters long.");
+			}
+			
+			// Determine if this is a new category.
+			String dbCategory = db.isACategory(user, newCategory);
+			if (dbCategory != null) {
+				System.out.println(dbCategory + " is already a category, "
+						+ "please pick a different new category name.");
+			} else {
+				// Capitalize first letter
+				newCategory = newCategory.toUpperCase().substring(0, 1)	
+						+ newCategory.toLowerCase().substring(1, newCategory.length());
+				boolean executed = db.addCategory(user, newCategory);
+				
+				// Inform user of outcome.
+				if (executed) {
+					System.out.println("Successfully added category: " + newCategory);
+				} else {
+					System.out.println("Unable to add category, please try again later.");
+				}
 				break;
 			}
 		}

@@ -1,9 +1,10 @@
 package view;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
 
-import controller.TransactionHelper;
+import controller.Helper;
 import model.Transaction;
 import model.Transaction.TransactionBuilder;
 
@@ -12,20 +13,20 @@ import model.Transaction.TransactionBuilder;
  * objects from user information.
  * @author L. James Davidson
  */
-abstract class CreateNewTransaction {
+abstract class NewTransaction {
 
 	// Constants regarding the restrictions from the SQLite database tables.
 	private static final int MAX_DESCR_CHARS = 20;
 	private static final int MAX_MEMO_CHARS = 20;
 	
 	// An array of strings containing the default user expense categories.
-	private static String[] categories;
+	private static List<String> categories;
 	
 	/**
 	 * Creates a new transaction object using the user input.
 	 * @param input is the scanner which reads user input.
 	 */
-	protected static Transaction run(Scanner input, String[] categoryNames) {
+	protected static Transaction run(Scanner input, List<String> categoryNames) {
 		
 		// Get the type of the transaction
 		boolean isDeposit = getType(input);
@@ -62,7 +63,7 @@ abstract class CreateNewTransaction {
 	 */
 	private static boolean getType(Scanner input) {
 		String question = "Was this transaction a deposit?";
-		return TransactionHelper.yesNoQuestion(input, question);
+		return Helper.yesNoQuestion(input, question);
 	}
 
 	/**
@@ -118,16 +119,16 @@ abstract class CreateNewTransaction {
 	 */
 	private static void setDate(Scanner input, TransactionBuilder transfer) {		
 		// If the transaction occurred today then set the transaction information
-		if (TransactionHelper.yesNoQuestion(input, "Was the transaction made today?")) {
+		if (Helper.yesNoQuestion(input, "Was the transaction made today?")) {
 			transfer.setDate(LocalDate.now());
 			return;
 		}
 		
 		// If transaction was not made today then get the day the transaction was made.
 		int[] dateInfo = new int[3];
-		TransactionHelper.setYear(input, dateInfo, "What year was the transaction made?");
-		TransactionHelper.setMonth(input, dateInfo, "What month was the transaction made?");
-		TransactionHelper.setDay(input, dateInfo, "What day was the transaction made?");
+		Helper.setYear(input, dateInfo, "What year was the transaction made?");
+		Helper.setMonth(input, dateInfo, "What month was the transaction made?");
+		Helper.setDay(input, dateInfo, "What day was the transaction made?");
 		transfer.setDate(LocalDate.of(dateInfo[0], dateInfo[1], dateInfo[2]));
 	}
 	
@@ -147,11 +148,11 @@ abstract class CreateNewTransaction {
 			
 			// Print out all the categories with their corresponding number in front. 
 			// Fence post with comma
-			for (int i = 0; i < categories.length - 1; i++) {
-				System.out.print(i + "-" + categories[i] + ", ");
+			for (int i = 0; i < categories.size() - 1; i++) {
+				System.out.print(i + "-" + categories.get(i) + ", ");
 			}
-			System.out.println((categories.length - 1) + "-" 
-					+ categories[categories.length - 1]);
+			System.out.println((categories.size() - 1) + "-" 
+					+ categories.get(categories.size() - 1));
 			
 			System.out.print("(You can add more cateogries from the settings menu.) \n"
 					+ "Please type the number corresponding to which category best fits"
@@ -167,15 +168,15 @@ abstract class CreateNewTransaction {
 			}
 			
 			// If number is invalid then inform user and try again.
-			if (catNum < 0 || catNum >= categories.length) {
+			if (catNum < 0 || catNum >= categories.size()) {
 				System.out.println("Invalid response. Please type a number between 0 and " 
-						+ (categories.length - 1) + ".");
+						+ (categories.size() - 1) + ".");
 				continue;
 			}
 			
 			// Attempt to set the category of the expense.
 			try {
-				transfer.setCategory(categories[catNum]);
+				transfer.setCategory(categories.get(catNum));
 			} catch (IllegalArgumentException e) {
 				System.out.println(e.getMessage());
 				continue;
@@ -226,7 +227,7 @@ abstract class CreateNewTransaction {
 		
 		while (true) {	
 			String question = "Would you like to edit anything?";
-			answer = TransactionHelper.yesNoQuestion(input, question);
+			answer = Helper.yesNoQuestion(input, question);
 			
 			// If the information is not correct then have the user edit the information.
 			if (answer) {
@@ -311,7 +312,7 @@ abstract class CreateNewTransaction {
 		System.out.println();
 		
 		System.out.print("Amount:    $");
-		System.out.printf("%+.2f", transfer.getAmountInCents() / 100.0);
+		System.out.printf(Helper.amountInCentsToFormattedDouble(transfer.getAmountInCents()) );
 		System.out.println();
 		
 		System.out.print("Date:      ");

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Scanner;
@@ -13,7 +14,7 @@ import java.util.Scanner;
  * Transaction Tracker program.
  * @author L. James Davidson
  */
-public class TransactionHelper {
+public class Helper {
 
 	// File path to this folder
 	protected static final String FILEPATH = (new File("")).getAbsolutePath();
@@ -23,6 +24,10 @@ public class TransactionHelper {
 	
 	// Log file writer
 	private static PrintWriter pw;
+	
+	// The formatter we will use for all decimal outputs.
+	private static final DecimalFormat DF = new DecimalFormat("#,###.00");
+	public static final int CENTS_IN_A_DOLLAR = 100;
 	
 	/** Prepares the log file for any errors which might occur. */
 	public static void prepare() {
@@ -91,7 +96,7 @@ public class TransactionHelper {
 	 * @modifies dateInfo[0], which is used to store the integer representing the year.
 	 */
 	public static void setYear(Scanner input, int[] dateInfo, String question) {
-		dateInfo[0] = TransactionHelper.numberResponse(input, question, 
+		dateInfo[0] = Helper.numberResponse(input, question, 
 				0, LocalDate.now().getYear());
 	}
 	
@@ -107,7 +112,7 @@ public class TransactionHelper {
 		int maxMonth = 12;
 		if (dateInfo[0] == today.getYear())
 			maxMonth = today.getMonthValue();
-		dateInfo[1] = TransactionHelper.numberResponse(input, question, 1, maxMonth);
+		dateInfo[1] = Helper.numberResponse(input, question, 1, maxMonth);
 	}
 	
 	/**
@@ -122,7 +127,7 @@ public class TransactionHelper {
 		int maxDay = LocalDate.of(dateInfo[0], dateInfo[1], 1).lengthOfMonth();
 		if (dateInfo[0] == today.getYear() && dateInfo[1] == today.getMonthValue())
 			maxDay = today.getDayOfMonth();
-		dateInfo[2] = TransactionHelper.numberResponse(input, question, 1, maxDay);
+		dateInfo[2] = Helper.numberResponse(input, question, 1, maxDay);
 	}
     
     /**
@@ -169,6 +174,10 @@ public class TransactionHelper {
 			System.out.print(categories[categories.length - 2] + " and " 
 					+ categories[categories.length - 1]);
 		}
+	}
+	
+	public static String amountInCentsToFormattedDouble(int amount) {
+		return DF.format((double)amount / CENTS_IN_A_DOLLAR);
 	}
 }  
 

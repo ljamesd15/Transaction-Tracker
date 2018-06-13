@@ -1,10 +1,11 @@
 package view;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Scanner;
 
-import controller.TransactionHelper;
-import controller.TransactionsDB;
+import controller.Helper;
+import controller.DB;
 import model.Transaction;
 import model.User;
 import model.BCrypt;
@@ -14,31 +15,31 @@ import model.BCrypt;
  * transactions, breakdown expenses via date, price, categories, and more.
  * @author L. James Davidson
  */
-public class TransactionsTrackerApp {
+public class App {
 	
 	// Max number of incorrect password attempts.
 	private final int MIN_INCORRECT_LOGIN_ATTEMPTS = 3;
 	
 	// The Transaction Tracker database.
-	private final TransactionsDB db;
+	private final DB db;
 	
 	// The current signed in user to this database.
 	private User currentUser;
 	
 	/** Initializes this application */
-	private TransactionsTrackerApp(TransactionsDB db) {
+	private App(DB db) {
 		this.db = db;
 	}
 	
 	/** Entry point for the text user interface */
 	public static void main(String[] args) throws SQLException {
-		TransactionsDB db = new TransactionsDB();
+		DB db = new DB();
 	    db.open();
 	      
 	    try {
 	    	//db.prepare();
-	    	TransactionHelper.prepare();
-	    	TransactionsTrackerApp app = new TransactionsTrackerApp(db);
+	    	Helper.prepare();
+	    	App app = new App(db);
 	    	app.run();
 	    } finally {
 	    	db.close();
@@ -51,7 +52,7 @@ public class TransactionsTrackerApp {
 		String response;
 		Scanner input = new Scanner(System.in);
 		
-	    System.out.println("Welcome to Transactions Tracker!");
+	    System.out.println("Welcome to Transaction Tracker!");
 	    System.out.println("Type '0' to get a list of commands.");
 	    
 	    while (keepGoing) {
@@ -175,7 +176,7 @@ public class TransactionsTrackerApp {
 				try {
 					this.db.close();
 				} catch (SQLException e) {
-					TransactionHelper.printErrorToLog(e);
+					Helper.printErrorToLog(e);
 				}
 				System.exit(1);
 			}
@@ -203,7 +204,7 @@ public class TransactionsTrackerApp {
 	 */
 	private void createUser(Scanner input) {
 		System.out.println("Creating new user...");
-		User newUser = CreateNewUser.run(input, this.db);
+		User newUser = NewUser.run(input, this.db);
 		boolean addedCorrectly = this.db.addNewUser(newUser);
 		
 		if (addedCorrectly) {
@@ -238,7 +239,7 @@ public class TransactionsTrackerApp {
 		}
 		
 		// Get user specific categories.
-		String[] categories = db.getCategories();
+		List<String> categories = db.getCategories(this.currentUser);
 
 		// If categories are null set them to the default categories and alert user.
 		if (categories == null) {
@@ -248,7 +249,7 @@ public class TransactionsTrackerApp {
 		}
 		
 		// Make a Transaction object.
-		Transaction trans = CreateNewTransaction.run(input, categories);
+		Transaction trans = NewTransaction.run(input, categories);
 		
 
 		try {
@@ -259,18 +260,19 @@ public class TransactionsTrackerApp {
 			this.db.addExpense(trans, this.currentUser.getUsername());
 			
 			// Change the user's balance by the amount of the transaction. 
-			double newBal = this.db.updateBalance(this.currentUser.getUsername(), 
+			int newBal = this.db.updateBalance(this.currentUser.getUsername(), 
 					trans.getAmountInCents());
 			
 			// Commit the transaction
 			this.db.commitTransaction();
 			
 			// Set the logged in user objects' new balance.
-			this.currentUser.setUserBalance(newBal / 100.0);
+			this.currentUser.setUserBalance((double)newBal / Helper.CENTS_IN_A_DOLLAR);
 			// We are dividing by 100 because the balances are stored in cents on the database.
 			
 			// Print new balance
-			System.out.println("Your current balance is $" + this.currentUser.getUserBalance());
+			System.out.println("Your current balance is $" 
+					+ Helper.amountInCentsToFormattedDouble(newBal));
 			
 		} catch (SQLException e) {
 			
@@ -279,10 +281,10 @@ public class TransactionsTrackerApp {
 				this.db.rollbackTransaction();
 				
 			} catch (SQLException e1) {
-				TransactionHelper.printErrorToLog(e1);
+				Helper.printErrorToLog(e1);
 			}
 			
-			TransactionHelper.printErrorToLog(e);
+			Helper.printErrorToLog(e);
 			System.out.println("Error adding transaction. Please see the log file.");
 			return;
 		}

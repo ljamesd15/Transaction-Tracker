@@ -19,23 +19,23 @@ password            VARCHAR(60) NOT NULL
 
 -- Contains valid category names in this program
 CREATE TABLE Categories (
-catName VARCHAR(30) PRIMARY KEY
+user_cat		VARCHAR(60) PRIMARY KEY,
+belongsTo 		VARCHAR(30) REFERENCES Users(username)
+							ON UPDATE CASCADE
+							ON DELETE CASCADE,
+catName 		VARCHAR(30)
 );
 
 -- Holds all of the transactions for all users
-DROP TABLE IF EXISTS Transactions;
 CREATE TABLE Transactions (
 description     VARCHAR(30)     NOT NULL,
 price_in_cents  INT,
 day             DATE,
 memo            VARCHAR(20),
-category        VARCHAR(30)     REFERENCES Categories(catName),
-belongsTo       VARCHAR(30)     REFERENCES Users(username)
-                                ON UPDATE CASCADE 
-                                ON DELETE CASCADE,
-PRIMARY KEY (description, price_in_cents, day, belongsTo)
+user_cat		VARCHAR(60) REFERENCES Categories(user_cat),
+PRIMARY KEY (description, price_in_cents, day, user_cat)
 );
 
 -- Add basic categories.
-INSERT INTO Categories VALUES ("N/A");
-INSERT INTO Categories VALUES ("Deposit");
+--INSERT INTO Categories VALUES ("N/A");
+--INSERT INTO Categories VALUES ("Deposit");

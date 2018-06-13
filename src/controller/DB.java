@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.Transaction;
 import model.User;
@@ -13,7 +15,34 @@ import model.User;
  * Allows clients to query and update the database in order to log in, add transactions, and 
  * breakdown expenses via date, price, categories, and more.
  */
-public class TransactionsDB {
+public class DB {
+	
+	private static final int TABLE_ABBREV_LEN = 2; // 1 for the character and 1 for the '.'
+	
+	// Attribute names for the tables used.
+	public static final String T_TABLE = "Transactions";
+	public static final char T_TAB_ABBREV = 't';
+	public static final String T_DESCRIP = "description";
+	public static final String T_PRICE = "price_in_cents";
+	public static final String T_DATE = "day";
+	public static final String T_MEMO = "memo";
+	public static final String T_UCAT = "user_cat";
+
+	public static final String C_TABLE = "Categories";
+	public static final char C_TAB_ABBREV = 'c';
+	public static final String C_UCAT = "user_cat";
+	public static final String C_CAT = "catName";
+	public static final String C_USER = "belongsTo";
+
+	public static final String U_TABLE = "Users";
+	public static final char U_TAB_ABBREV = 'u';
+	public static final String U_USER = "username";
+	public static final String U_NAME = "name";
+	public static final String U_BAL = "balance_in_cents";
+	public static final String U_PASS = "password";
+	
+	/** Attributes of transactions that will be shown to user which match db attribute names. */
+	public static final String[] T_TAB_ATTRIBS = {T_DESCRIP, T_PRICE, T_DATE, T_MEMO, T_UCAT};
 
 	/** Holds the connection to the database. */
 	private Connection conn;
@@ -22,13 +51,16 @@ public class TransactionsDB {
 	private PreparedStatement beginTxnStmt;
 	private PreparedStatement commitTxnStmt;
 	private PreparedStatement abortTxnStmt;
+	
+	/** Categories which will be automatically added when a user is added to the database. */
+	private final String[] defaultCats = {"N/A", "Misc", "Deposit"};
     
     /** Opens a connection with the TransactionsTracker database **/
     public void open() {
         try {
         	Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(
-					 "jdbc:sqlite:" + TransactionHelper.FILEPATH + "\\data\\TT.db");
+					 "jdbc:sqlite:" + Helper.FILEPATH + "\\data\\TT.db");
 			
 			// Set up the transaction start, commit, and roll back statements
 		    beginTxnStmt = this.conn.prepareStatement("BEGIN TRANSACTION;");
@@ -36,7 +68,7 @@ public class TransactionsDB {
 		    abortTxnStmt = this.conn.prepareStatement("ROLLBACK;");
 		    
 		} catch (SQLException | ClassNotFoundException e) {
-			TransactionHelper.printErrorToLog(e);
+			Helper.printErrorToLog(e);
 			System.out.println("Error establishing connection, please see log file.");
 			System.exit(1);
 		}
@@ -82,16 +114,11 @@ public class TransactionsDB {
 	public boolean isUsernameTaken(String username) {
 		// Initialize query and statement.
 		PreparedStatement check;
-		String sqlStmt = "SELECT *\n"
-					   + "FROM Users \n"
-					   + "WHERE username = ?";
+		String sqlStmt = "SELECT * FROM " + U_TABLE + "WHERE " + U_USER + " = ?";
 		
 		try {
-			// Clear parameters and sanitize string.
 			check = this.conn.prepareStatement(sqlStmt);
 			check.clearParameters();
-			
-			// Fill in parameter and execute query
 			check.setString(1, username);
 			ResultSet users = check.executeQuery();
 			
@@ -99,7 +126,7 @@ public class TransactionsDB {
 			return users.next();
 			
 		} catch (SQLException e) {
-			TransactionHelper.printErrorToLog(e);
+			Helper.printErrorToLog(e);
 			return true;
 		}
 	}
@@ -112,28 +139,27 @@ public class TransactionsDB {
 	public boolean addNewUser(User newUser) {
 		// Initialize query and SQL statement.
 		PreparedStatement addUser;
-		String sqlStmt = "INSERT INTO Users VALUES (?, ?, ?, ?)";
+		String sqlStmt = "INSERT INTO " + U_TABLE + " VALUES (?, ?, ?, ?)";
+		boolean correctlyExecuted = true;
 		
 		try {
-			// Sanitize string and clear parameters.
 			addUser = this.conn.prepareStatement(sqlStmt);
 			addUser.clearParameters();
-			
-			// Add in parameter info.
 			addUser.setString(1, newUser.getUsername());
 			addUser.setString(2, newUser.getFullName());
 			addUser.setFloat(3, (float) 0.00);
 			addUser.setString(4, newUser.getPassword());
-			
-			// Execute query
 			addUser.execute();
 			
+			// Add each of the default categories for this new user.
+			for (int i = 0; i < defaultCats.length; i++) {
+				correctlyExecuted = correctlyExecuted && this.addCategory(newUser, defaultCats[i]);
+			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			return false;
 		}
-		
-		return true;
+		return correctlyExecuted;
 	}
     
     /**
@@ -145,33 +171,21 @@ public class TransactionsDB {
       
   	  // Create query and statement
   	  PreparedStatement logIn;
-  	  String sqlStmt = 
-  			  "SELECT *\n"
-  			  + "FROM Users\n"
-  			  + "WHERE username = ?";
+  	  String sqlStmt = "SELECT * FROM " + U_TABLE + " WHERE " + U_USER + " = ?";
   	  
   	ResultSet results;
   	  try {
-  	  	  // Prepare the statement and clear parameters
   	  	  logIn = conn.prepareStatement(sqlStmt);
   	  	  logIn.clearParameters();
-  	  	  
-  	  	  // Set the information in this statement
   	  	  logIn.setString(1, username);
-  	  	  
-  	  	  // Execute the query
   	  	  results = logIn.executeQuery();
   	  	  
-  	  	  // If no results then return null
-  	  	  if (!results.next()) {
+  	  	  if (!results.next())
   	  		  return null;
-  	  	  }
-  	  	  
-  	  	  return new User(results.getString("username"), results.getString("name"), 
-  	  			  results.getInt("balance_in_cents") / 100.0, results.getString("password"));
-  	  	  
+  	  	  return new User(results.getString(U_USER), results.getString(U_NAME), 
+  	  			  results.getInt(U_BAL) / 100.0, results.getString(U_PASS)); 
   	  } catch (SQLException e) {
-  		  TransactionHelper.printErrorToLog(e);
+  		  Helper.printErrorToLog(e);
   		  return null;
   	  }
     }
@@ -185,21 +199,15 @@ public class TransactionsDB {
     public void addExpense(Transaction expense, String username) throws SQLException {    	
     	// Initialize query and statement.
     	PreparedStatement insert;
-    	String sqlStmt = "INSERT INTO Transactions VALUES (?, ?, ?, ? , ?, ?)";
+    	String sqlStmt = "INSERT INTO " + T_TABLE + " VALUES (?, ?, ?, ?, ?)";
     	      	
-    	// Clear parameters
     	insert = this.conn.prepareStatement(sqlStmt);
     	insert.clearParameters();
-    	
-    	// Insert parameters from Transaction object.
     	insert.setString(1, expense.getDescription());
-    	insert.setFloat(2, expense.getAmountInCents());
+    	insert.setInt(2, expense.getAmountInCents());
     	insert.setString(3, expense.getDate().toString());
     	insert.setString(4, expense.getMemo());
-    	insert.setString(5, expense.getCategory());
-    	insert.setString(6, username);
-    	
-		// Add transaction
+    	insert.setString(5, username + "_" + expense.getCategory());
 		insert.execute();
     }
     
@@ -210,12 +218,12 @@ public class TransactionsDB {
      * @return The new account balance.
      * @throws SQLException if there was a problem updating the user's balance.
      */
-    public Integer updateBalance(String username, int amount) throws SQLException {
+    public int updateBalance(String username, int amount) throws SQLException {
     	// Initialize both SQL statement and the prepared statements.
     	PreparedStatement check;
-    	String checkStmt = "SELECT balance_in_cents FROM Users WHERE username = ?";
+    	String checkStmt = "SELECT " + U_BAL + " FROM " + U_TABLE + " WHERE " + U_USER + " = ?";
     	PreparedStatement update;
-    	String updateStmt = "UPDATE Users SET balance_in_cents = ? WHERE username = ?";
+    	String updateStmt = "UPDATE " + U_TABLE + " SET " + U_BAL + " = ? WHERE " + U_USER + " = ?";
     	
     	// Get current balance value
 		check = this.conn.prepareStatement(checkStmt);
@@ -223,93 +231,69 @@ public class TransactionsDB {
 		check.setString(1, username);
 		ResultSet checkResult = check.executeQuery();
 		
-		// Move the cursor forward
 		checkResult.next();
 		int balance = checkResult.getInt(1);
 		
-		// Calculate new balance
+		// Calculate & update new balance
 		balance = balance + amount;
-		
-		// Update user balance
 		update = this.conn.prepareStatement(updateStmt);
 		update.clearParameters();
-		update.setFloat(1, balance);
+		update.setInt(1, balance);
 		update.setString(2, username);
 		update.execute();
-		
 		return balance;
     }
     
     /**
-     * Gets the categories which are available in this program.
+     * Gets the categories which are available to the specified user.
      * @return A list of strings containing the available categories or null if there was
      * 		an exception which prevented the database from being accessed properly.
      */
-	public String[] getCategories() {
-		// Find the number of categories in the DB
-		PreparedStatement query;
-		String sqlStmt = "SELECT count(*) \n"
-				   + "FROM Categories";
-		
+	public List<String> getCategories(User user) {
+		// Find the categories in the DB.
+		String sqlStmt = "SELECT " + C_CAT + " FROM " + C_TABLE + " WHERE " + C_USER + " = ?";
 		try {
-			query = conn.prepareStatement(sqlStmt);
+			PreparedStatement query = conn.prepareStatement(sqlStmt);			
+			query.clearParameters();
+			query.setString(1, user.getUsername());
 			ResultSet result = query.executeQuery();
+			List<String> categories = new ArrayList<String>();
 			
-			// Move cursor to the first row and grab the number of categories.
-			result.next();
-			int rows = result.getInt(1);
-			String[] categories = new String[rows];
-			
-			// Find the categories in the DB.
-			sqlStmt = "SELECT catName \n"
-						   + "FROM Categories";
-			
-			// Execute query
-			query = conn.prepareStatement(sqlStmt);
-			result = query.executeQuery();
-			
-			// Add categories from the result set to the string array.
-			for (int i = 0; i < rows; i++) {
-				// Add next category name to categories
-				// Only 1 column, always getting the string i the first column.
-				result.next();
-				categories[i] = result.getString(1);
+			while (result.next()) {
+				categories.add(result.getString(1));
 			}
-
 			return categories;
-			
 		} catch (SQLException e) {
-			TransactionHelper.printErrorToLog(e);
+			Helper.printErrorToLog(e);
 			return null;
 		}
 	}
 	
 	/**
-<<<<<<< HEAD
-	 * Determines if a string is a category in the provided database.
+	 * Determines if a string matches a category for the specified user.
 	 * @return The category with correct casing if the string parameter matches a transaction 
 	 * category otherwise returns null.
 	 */
-    public String isACategory(String category) {
-    	String[] categories = this.getCategories();
-    	
-		for (int i = 0; i < categories.length; i++) {
-			if (categories[i].equalsIgnoreCase(category)) {
-				return categories[i];
+    public String isACategory(User user, String category) {
+    	List<String> categories = this.getCategories(user);
+		for (int i = 0; i < categories.size(); i++) {
+			if (categories.get(i).equalsIgnoreCase(category)) {
+				return categories.get(i);
 			}
 		}
 		return null;
     }
     
     /**
-     * Prints the categories one after another with a comma and space separating each one.
+     * Prints the categories available to the specified user
+     * one after another with a comma and space separating each one.
      */
-    public void printCategories() {
-    	String[] categories = this.getCategories();
-		for (int i = 0; i < categories.length - 1; i++) {
-			System.out.print(categories[i] + ", ");
+    public void printCategories(User user) {
+    	List<String> categories = this.getCategories(user);
+		for (int i = 0; i < categories.size() - 1; i++) {
+			System.out.print(categories.get(i) + ", ");
 		}
-		System.out.println("and " + categories[categories.length - 1] + ".");
+		System.out.println("and " + categories.get(categories.size() - 1) + ".");
     }
 
 	/**
@@ -319,25 +303,19 @@ public class TransactionsDB {
 	 * @return True if the update was successfully executed.
 	 */
 	public boolean changeFullName(User user, String newName) {
-		// Initialize query and statement.
 		PreparedStatement update;
-		String sqlStmt = "UPDATE Users SET name = ? WHERE username = ?";
+		String sqlStmt = "UPDATE " + U_TABLE + " SET " + U_NAME + " = ? WHERE " + U_USER + " = ?";
 		
 		try {
-			// Clear the parameters of the query.
 			update = this.conn.prepareStatement(sqlStmt);
 			update.clearParameters();
-			
-			// Set parameters
 			update.setString(1, newName);
 			update.setString(2, user.getUsername());
-			
-			// Execute update
 			update.execute();
 			return true;
 			
 		} catch (SQLException e) {
-			TransactionHelper.printErrorToLog(e);
+			Helper.printErrorToLog(e);
 			return false;
 		}
 	}
@@ -349,55 +327,106 @@ public class TransactionsDB {
 	 * @return True if the update was successfully executed.
 	 */
 	public boolean changePassword(User user, String newPassword) {
-		// Initialize query and statement.
 		PreparedStatement update;
-		String sqlStmt = "UPDATE Users SET password = ? WHERE username = ?";
+		String sqlStmt = "UPDATE " + U_TABLE + " SET " + U_PASS + " = ? WHERE " + U_USER + " = ?";
 		
 		try {
-			// Clear the parameters of the query.
 			update = this.conn.prepareStatement(sqlStmt);
 			update.clearParameters();
-			
-			// Set parameters
 			update.setString(1, newPassword);
 			update.setString(2, user.getUsername());
-			
-			// Execute update
 			update.execute();
 			return true;
 			
 		} catch (SQLException e) {
-			TransactionHelper.printErrorToLog(e);
+			Helper.printErrorToLog(e);
 			return false;
 		}
 	}
 	
 	/**
-	 * Adds a new category to this DB.
-	 * @param category is the new category.
+	 * Adds a new category to this DB for the specified user.
+	 * @param user The user which will have access to the specified category.
+	 * @param category is the new category for the specified user.
 	 * @return True if the category was successfully added.
 	 */
-	public boolean addCategory(String category) {
-		// Initialize query and SQL statement
+	public boolean addCategory(User user, String category) {
 		PreparedStatement insert;
-		String sqlStmt = "INSERT INTO Categories VALUES(?)";
+		String sqlStmt = "INSERT INTO " + C_TABLE + " VALUES(?, ?, ?)";
 		
 		try {
-			// Clear parameters
 			insert = this.conn.prepareStatement(sqlStmt);
 			insert.clearParameters();
-			
-			// Set parameter
-			insert.setString(1, category);
-			
-			// Execute insert
+			insert.setString(1, user.getUsername() + "_" + category);
+			insert.setString(2, user.getUsername());
+			insert.setString(3, category);
 			insert.execute();
 			return true;
 			
 		} catch (SQLException e) {
-			TransactionHelper.printErrorToLog(e);
+			Helper.printErrorToLog(e);
 			return false;
 		}
+	}
+	
+	
+	
+	/**
+	 * Prepares a SQL statement which can be used to queried a user's transaction history.
+	 * @param user THe user whose transaction's will be queried.
+	 * @param orderByClauses The order in which the output should be ordered.
+	 * @param whereClauses Filters which will be applied to the user's transaction history.
+	 * @return A SQL statement to be executed and get the user's requested transaction history.
+	 */
+	public String prepareHistoryQuery(User user, String[] orderByClauses, List<String> whereClauses) {
+		// Construct query using given user specifications.
+		String stmt = "SELECT ";
+		for (int i = 0; i < T_TAB_ATTRIBS.length; i++) {
+			stmt += T_TAB_ABBREV + "." + T_TAB_ATTRIBS[i] + ", ";
+		}
+		stmt += C_TAB_ABBREV + ".catName FROM Transactions " + T_TAB_ABBREV 
+				+ ", Categories " + C_TAB_ABBREV + " WHERE ";
+		
+		List<String> attributeSpecificClauses;
+		for (int i = 0; i < T_TAB_ATTRIBS.length; i++) {
+			attributeSpecificClauses = new ArrayList<String>();
+			String attribute = T_TAB_ATTRIBS[i];
+			
+			for (int j = 0; j < whereClauses.size(); j++) {
+				// If the where clause matches the attribute add to attributeSpecificClauses
+				String clause = whereClauses.get(j);
+				if (clause.substring(0, attribute.length() + TABLE_ABBREV_LEN)
+						.equals(T_TAB_ABBREV + "." + attribute))
+					attributeSpecificClauses.add(clause);
+			}
+			
+			if (attributeSpecificClauses.size() == 0)
+				continue;
+			// 'or' the clauses which have the same attribute together.
+			stmt += "(";
+			for (int k = 0; k < attributeSpecificClauses.size() - 1; k++) {
+				whereClauses.remove(attributeSpecificClauses.get(k));
+				stmt += attributeSpecificClauses.get(k) + " OR ";
+			}
+			stmt += attributeSpecificClauses.get(attributeSpecificClauses.size() - 1) + ") AND ";
+			whereClauses.remove(attributeSpecificClauses.get(attributeSpecificClauses.size() - 1));
+			// Removing used where clauses to reduce scanning time for next attribute.
+		}
+		
+		stmt += T_TAB_ABBREV + ".user_cat = " + C_TAB_ABBREV + ".user_cat ORDER BY ";
+		
+		for (int i = 0; i < T_TAB_ATTRIBS.length; i++) {
+			stmt += orderByClauses[i];
+			if (i == T_TAB_ATTRIBS.length - 1 || orderByClauses[i + 1] == null) {
+				// Last ordering attribute
+				stmt += ";";
+				break;
+			} else {
+				stmt += ", ";
+			}
+		}
+		
+		return stmt;
 	}
 	
 	/**
@@ -410,7 +439,7 @@ public class TransactionsDB {
 			PreparedStatement stmt = this.conn.prepareStatement(query);
 			return stmt.executeQuery();
 		} catch (SQLException e) {
-			TransactionHelper.printErrorToLog(e);
+			Helper.printErrorToLog(e);
 			return null;
 		}
 	}

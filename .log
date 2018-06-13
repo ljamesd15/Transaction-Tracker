@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-!SESSION 2018-01-02 21:53:34.655
 !MESSAGE [SQLITE_ERROR] SQL error or missing database (no such table: Users)
 !STACK TRACE
 org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such table: Users)
@@ -118,5 +116,72 @@ Caused by: java.text.ParseException: Unparseable date: "2018-06-01" does not mat
 	at org.sqlite.jdbc3.JDBC3ResultSet.getDate(JDBC3ResultSet.java:324)
 	... 6 more
 
-=======
->>>>>>> branch 'showHistory' of git@github.com:ljamesd15/Transaction-Tracker.git
+!MESSAGE [SQLITE_ERROR] SQL error or missing database (table Transactions has 5 columns but 6 values were supplied)
+!STACK TRACE
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (table Transactions has 5 columns but 6 values were supplied)
+	at org.sqlite.core.DB.newSQLException(DB.java:909)
+	at org.sqlite.core.DB.newSQLException(DB.java:921)
+	at org.sqlite.core.DB.throwex(DB.java:886)
+	at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+	at org.sqlite.core.NativeDB.prepare(NativeDB.java:127)
+	at org.sqlite.core.DB.prepare(DB.java:227)
+	at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:41)
+	at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:30)
+	at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:19)
+	at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:48)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:263)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:235)
+	at controller.TransactionsDB.addExpense(TransactionsDB.java:202)
+	at view.TransactionsTrackerApp.addTransaction(TransactionsTrackerApp.java:260)
+	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:91)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:43)
+
+!SESSION 2018-06-13 10:35:58.913
+!MESSAGE [SQLITE_ERROR] SQL error or missing database (no such column: category)
+!STACK TRACE
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such column: category)
+	at org.sqlite.core.DB.newSQLException(DB.java:909)
+	at org.sqlite.core.DB.newSQLException(DB.java:921)
+	at org.sqlite.core.DB.throwex(DB.java:886)
+	at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+	at org.sqlite.core.NativeDB.prepare(NativeDB.java:127)
+	at org.sqlite.core.DB.prepare(DB.java:227)
+	at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:41)
+	at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:30)
+	at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:19)
+	at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:48)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:263)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:235)
+	at controller.TransactionsDB.executeQuery(TransactionsDB.java:404)
+	at view.ShowHistory.outputResults(ShowHistory.java:135)
+	at view.ShowHistory.run(ShowHistory.java:72)
+	at view.TransactionsTrackerApp.showTransactionHistory(TransactionsTrackerApp.java:301)
+	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:96)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:43)
+
+!SESSION 2018-06-13 10:43:27.231
+!MESSAGE no such column: 'category'
+!STACK TRACE
+java.sql.SQLException: no such column: 'category'
+	at org.sqlite.jdbc3.JDBC3ResultSet.findColumn(JDBC3ResultSet.java:48)
+	at org.sqlite.jdbc3.JDBC3ResultSet.getString(JDBC3ResultSet.java:443)
+	at view.ShowHistory.outputResults(ShowHistory.java:155)
+	at view.ShowHistory.run(ShowHistory.java:72)
+	at view.TransactionsTrackerApp.showTransactionHistory(TransactionsTrackerApp.java:301)
+	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:96)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:43)
+
+!SESSION 2018-06-13 11:51:40.357
+!MESSAGE [SQLITE_BUSY]  The database file is locked (database is locked)
+!STACK TRACE
+org.sqlite.SQLiteException: [SQLITE_BUSY]  The database file is locked (database is locked)
+	at org.sqlite.core.DB.newSQLException(DB.java:909)
+	at org.sqlite.core.DB.newSQLException(DB.java:921)
+	at org.sqlite.core.DB.execute(DB.java:822)
+	at org.sqlite.core.DB.executeUpdate(DB.java:863)
+	at org.sqlite.jdbc3.JDBC3PreparedStatement.executeUpdate(JDBC3PreparedStatement.java:99)
+	at controller.TransactionsDB.commitTransaction(TransactionsDB.java:97)
+	at view.TransactionsTrackerApp.addTransaction(TransactionsTrackerApp.java:267)
+	at view.TransactionsTrackerApp.run(TransactionsTrackerApp.java:91)
+	at view.TransactionsTrackerApp.main(TransactionsTrackerApp.java:43)
+
