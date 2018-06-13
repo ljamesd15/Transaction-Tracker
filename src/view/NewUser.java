@@ -29,16 +29,9 @@ abstract class NewUser {
 	 * @return A User object containing the new user information.
 	 */
 	protected static User run(Scanner input, DB db) {
-		
-		// Determine the new user's user name
 		String username = setUsername(input, db);
-		
-		// Determine the new user's full name.
 		String fullName = setFullName(input);
-		
-		// Determine the new user's password
 		String password = setPassword(input);
-		
 		return new User(username, fullName, STARTING_BALANCE, password);
 	}
 
@@ -50,10 +43,8 @@ abstract class NewUser {
 	 */
 	private static String setUsername(Scanner input, DB db) {
 		String username;
-		boolean usernameTaken;
 		
 		while (true) {
-			// Ask user which user name they would like to have.
 			System.out.print('\n' + "What would you like your username to be?" + '\n' + "> ");
 			username = input.nextLine();
 			
@@ -64,13 +55,10 @@ abstract class NewUser {
 				continue;
 			}
 			
-			// Check if the user name has already been taken.
-			usernameTaken = db.isUsernameTaken(username);
-			if (usernameTaken) {
+			if (db.isUsernameTaken(username)) {
 				System.out.println("The username '" + username + "' is already taken.");
 				continue;
 			}
-			
 			break;
 		}
 		
@@ -85,20 +73,13 @@ abstract class NewUser {
 	protected static String setFullName(Scanner input) {
 		String name;
 		while (true) {
-			// Ask user what their full name is.
 			System.out.print('\n' + "What is your full name?" + '\n' + "> ");
 			name = input.nextLine();
-			
-			// Check if the name is less than the maximum number of characters allowed.
-			if (name.length() > MAX_FULLNAME_CHARS) {
-				System.out.println("Names must be less than " + MAX_FULLNAME_CHARS 
-						+ " characters long.");
-				continue;
-			}
-			
-			break;
+			if (name.length() <= MAX_FULLNAME_CHARS)
+				break;
+			System.out.println("Names must be less than " + MAX_FULLNAME_CHARS 
+					+ " characters long.");
 		}
-		
 		return name;
 	}
 
@@ -110,38 +91,31 @@ abstract class NewUser {
 	protected static String setPassword(Scanner input) {
 		String hashed;
 		while (true) {
-			// Ask user what they want their password to be.
 			System.out.print('\n' + "What do you want you password to be?" + '\n' + "> ");
 			String password = input.nextLine();
 			
-			// Check if password is at least a minimum amount of characters long.
 			if (password.length() < MIN_PASSWORD_CHARS) {
 				System.out.println("Passwords must be at least " + MIN_PASSWORD_CHARS 
 						+ " characters long.");
 				continue;
 			
-			// Check if password is less than the maximum amount of characters long.
 			} else if (password.length() > MAX_PASSWORD_CHARS) {
 				System.out.println("Passwords must be less than " + MAX_PASSWORD_CHARS 
 						+ " characters long.");
 				continue;
 			}
 			
-			// Have user type in their password again.
+			// Have user confirm their password.
 			System.out.print("Please type the password again to confirm." + '\n' + "> ");
 			String passAgain = input.nextLine();
-			
 			if (!passAgain.equals(password)) {
 				System.out.println("Passwords do not match.");
 				continue;
 			}
 			
-			// Hash the password using BCrypt
 			hashed = BCrypt.hashpw(password, BCrypt.gensalt());
-			
 			break;
 		}
-		
 		return hashed;
 	}
 }

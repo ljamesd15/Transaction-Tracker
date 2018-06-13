@@ -35,8 +35,6 @@ public class Transaction {
 		this.category = builder.category;
 		this.memo = builder.memo;
 		this.isDeposit = builder.isDeposit;
-		
-		// Make sure the representation invariant is satisfied.
 		this.checkRep();
 	}
 	
@@ -112,11 +110,9 @@ public class Transaction {
 		 * @throws IllegalArgumentException if the parameter is null.
 		 */
 		public void setDescription(String descr) {
-			if (descr == null) {
+			if (descr == null)
 				throw new IllegalArgumentException("The location of the "
 						+ "transaction must be non-null.");
-			}
-			
 			this.description = descr;
 		}
 		
@@ -154,10 +150,8 @@ public class Transaction {
 		 * @throws IllegalArgumentException if date is null.
 		 */
 		public void setDate(LocalDate date) {
-			if (date == null) {
+			if (date == null)
 				throw new IllegalArgumentException("The date of a transaction cannot be null.");
-			}
-			
 			this.date = date;
 		}
 		
@@ -176,11 +170,9 @@ public class Transaction {
 		 * @throws IllegalArgumentException if category is null.
 		 */
 		public void setCategory(String category) {
-			if (category == null) {
+			if (category == null)
 				throw new IllegalArgumentException("The category of a transaction "
 						+ "cannot be null.");
-			}
-			
 			this.category = category;
 			
 			// Resetting the amount so that if this transactions amount is positive only if 
@@ -201,10 +193,8 @@ public class Transaction {
 		 * @throws An InvalidArgumentException if memo is null.
 		 */
 		public void setMemo(String memo) {
-			if (memo == null) {
+			if (memo == null)
 				throw new IllegalArgumentException("The memo cannot be null.");
-			}
-			
 			this.memo = memo;
 		}
 		
@@ -244,16 +234,9 @@ public class Transaction {
 	 * Ensures that the representation invariant is preserved.
 	 */
 	private void checkRep() {
-		// The description of the transaction must be non-null.
 		assert(this.description != null) : "The description must be non-null.";
-		
-		// The date must be non-null		
 		assert (this.date != null) : "The date for this transaction must be non-null";
-		
-		// The category of this must be non-null.
 		assert (this.category != null) : "The category for this transaction must be non-null.";
-		
-		// The memo of the transaction must be non-null.
 		assert (this.memo != null) : "The memo for this transaction must be non-null.";
 	}
 

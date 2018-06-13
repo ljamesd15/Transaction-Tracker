@@ -19,41 +19,32 @@ class Settings {
 	 */
 	public static void run(DB db, Scanner input, User user) {
 		printUserSettingsCommands();
-		
-		// Initializing user response.
 		String response;
 		boolean keepGoing = true;
 		
-		// While a valid command has not been chosen.
 		while (keepGoing) {
 		    System.out.print('\n' + "(Settings) What would you like to do?" + '\n' + "> ");
 			response = input.nextLine().toLowerCase();
 			
-			// Cases for user input.
 			switch (response) {
 			
 				case "0":
-					// Print available options
 					printUserSettingsCommands();
 					break;
 					
 				case "1":
-					// Change full name
 					editUserFullName(db, input, user);
 					break;
 				
 				case "2":
-					// Change password
 					editUserPassword(db, input, user);
 					break;
 					
 				case "3":
-					// Add a category
 					addCategory(db, input, user);
 					break;
 					
 				case "back":
-					// Go back to settings menu
 					keepGoing = false;
 					break;
 					
@@ -82,7 +73,6 @@ class Settings {
 	 * @modifies The logged in user's full name.
 	 */
 	private static void editUserFullName(DB db, Scanner input, User user) {
-		
 		while (true) {
 			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
 			String password = input.nextLine();
@@ -92,25 +82,15 @@ class Settings {
 				System.out.println("Incorrect password.");
 						
 			} else {
-				// Get new full name
 				String newName = NewUser.setFullName(input);
-				
-				// Have DB change the user's full name
-				boolean executed = db.changeFullName(user, newName);
-				
-				// Inform user of output.
-				if (executed) {
+				if (db.changeFullName(user, newName)) {
 					System.out.println("Full name changed from '" + user.getFullName() + "' to '"
 							+ newName + "'.");
-					
-					// Only set the user object's full name to newName once the execution was 
-					// successfully completed.
 					user.setUserFullName(newName);
 					
 				} else {
 					System.out.println("Unable to change full name, please try again later.");
 				}
-
 				break;
 			}
 		}
@@ -123,7 +103,6 @@ class Settings {
 	 * @modifies The logged in user's password.
 	 */
 	private static void editUserPassword(DB db, Scanner input, User user) {
-		
 		while (true) {
 			System.out.print('\n' + "Please enter your current password" + '\n' + "> ");
 			String password = input.nextLine();
@@ -133,24 +112,14 @@ class Settings {
 				System.out.println("Incorrect password.");
 				
 			} else {
-				// Get new password
 				String newPassword = NewUser.setPassword(input);
-				
-				// Have DB change the user password		
-				boolean executed = db.changePassword(user, newPassword);
-				
-				// Inform user of output.
-				if (executed) {
+				if (db.changePassword(user, newPassword)) {
 					System.out.println("Password successfully changed.");
-					
-					// Only set the logged in user's password to the new password if the update 
-					// was executed successfully.
 					user.setPassword(newPassword);
 					
 				} else {
 					System.out.println("Unable to change password, please try again later.");
 				}
-
 				break;
 			}
 		}
@@ -164,7 +133,6 @@ class Settings {
 	 */
 	private static void addCategory(DB db, Scanner input, User user) {
 		while (true) {
-			// Print out current categories.
 			System.out.print("Current categories are ");
 			db.printCategories(user);
 			
@@ -186,10 +154,8 @@ class Settings {
 				// Capitalize first letter
 				newCategory = newCategory.toUpperCase().substring(0, 1)	
 						+ newCategory.toLowerCase().substring(1, newCategory.length());
-				boolean executed = db.addCategory(user, newCategory);
 				
-				// Inform user of outcome.
-				if (executed) {
+				if (db.addCategory(user, newCategory)) {
 					System.out.println("Successfully added category: " + newCategory);
 				} else {
 					System.out.println("Unable to add category, please try again later.");

@@ -61,8 +61,6 @@ public class DB {
         	Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection(
 					 "jdbc:sqlite:" + Helper.FILEPATH + "\\data\\TT.db");
-			
-			// Set up the transaction start, commit, and roll back statements
 		    beginTxnStmt = this.conn.prepareStatement("BEGIN TRANSACTION;");
 		    commitTxnStmt = this.conn.prepareStatement("COMMIT");
 		    abortTxnStmt = this.conn.prepareStatement("ROLLBACK;");
@@ -112,7 +110,6 @@ public class DB {
      * @return True if the user name is taken and false if it is available.
      */
 	public boolean isUsernameTaken(String username) {
-		// Initialize query and statement.
 		PreparedStatement check;
 		String sqlStmt = "SELECT * FROM " + U_TABLE + "WHERE " + U_USER + " = ?";
 		
@@ -121,8 +118,6 @@ public class DB {
 			check.clearParameters();
 			check.setString(1, username);
 			ResultSet users = check.executeQuery();
-			
-			// If there are no values in the result set then this user name is not taken.
 			return users.next();
 			
 		} catch (SQLException e) {
@@ -137,7 +132,6 @@ public class DB {
 	 * @return True if the user was added successfully.
 	 */
 	public boolean addNewUser(User newUser) {
-		// Initialize query and SQL statement.
 		PreparedStatement addUser;
 		String sqlStmt = "INSERT INTO " + U_TABLE + " VALUES (?, ?, ?, ?)";
 		boolean correctlyExecuted = true;
@@ -168,8 +162,6 @@ public class DB {
      * 		null if login failed.
      */
     public User logIn(String username) {
-      
-  	  // Create query and statement
   	  PreparedStatement logIn;
   	  String sqlStmt = "SELECT * FROM " + U_TABLE + " WHERE " + U_USER + " = ?";
   	  
@@ -196,8 +188,7 @@ public class DB {
      * @param username is the user who the transaction will be added to.
      * @throws SQLException if there was an error when adding the transaction to the database.
      */
-    public void addExpense(Transaction expense, String username) throws SQLException {    	
-    	// Initialize query and statement.
+    public void addExpense(Transaction expense, String username) throws SQLException {
     	PreparedStatement insert;
     	String sqlStmt = "INSERT INTO " + T_TABLE + " VALUES (?, ?, ?, ?, ?)";
     	      	
@@ -219,7 +210,6 @@ public class DB {
      * @throws SQLException if there was a problem updating the user's balance.
      */
     public int updateBalance(String username, int amount) throws SQLException {
-    	// Initialize both SQL statement and the prepared statements.
     	PreparedStatement check;
     	String checkStmt = "SELECT " + U_BAL + " FROM " + U_TABLE + " WHERE " + U_USER + " = ?";
     	PreparedStatement update;
@@ -250,7 +240,6 @@ public class DB {
      * 		an exception which prevented the database from being accessed properly.
      */
 	public List<String> getCategories(User user) {
-		// Find the categories in the DB.
 		String sqlStmt = "SELECT " + C_CAT + " FROM " + C_TABLE + " WHERE " + C_USER + " = ?";
 		try {
 			PreparedStatement query = conn.prepareStatement(sqlStmt);			
@@ -263,6 +252,7 @@ public class DB {
 				categories.add(result.getString(1));
 			}
 			return categories;
+			
 		} catch (SQLException e) {
 			Helper.printErrorToLog(e);
 			return null;
@@ -277,9 +267,8 @@ public class DB {
     public String isACategory(User user, String category) {
     	List<String> categories = this.getCategories(user);
 		for (int i = 0; i < categories.size(); i++) {
-			if (categories.get(i).equalsIgnoreCase(category)) {
+			if (categories.get(i).equalsIgnoreCase(category))
 				return categories.get(i);
-			}
 		}
 		return null;
     }
@@ -379,7 +368,6 @@ public class DB {
 	 * @return A SQL statement to be executed and get the user's requested transaction history.
 	 */
 	public String prepareHistoryQuery(User user, String[] orderByClauses, List<String> whereClauses) {
-		// Construct query using given user specifications.
 		String stmt = "SELECT ";
 		for (int i = 0; i < T_TAB_ATTRIBS.length; i++) {
 			stmt += T_TAB_ABBREV + "." + T_TAB_ATTRIBS[i] + ", ";

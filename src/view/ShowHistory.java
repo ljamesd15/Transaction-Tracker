@@ -38,8 +38,7 @@ public class ShowHistory {
 	 * @param user The user whose transactions this will display.
 	 */
 	public static void run(Scanner input, DB db, User user) {
-		
-		// Ask user regarding ordering of output transactions.
+		// Figure out what ordering of output the user wants.
 		String[] orderByClause = new String[DB.T_TAB_ATTRIBS.length];
 		int numOfOrderingAttributes = 0;
 		boolean addAnother;
@@ -50,7 +49,7 @@ public class ShowHistory {
 			
 		} while (addAnother && numOfOrderingAttributes < DB.T_TAB_ATTRIBS.length);
 		
-		// Ask user regarding filtering of transactions which will be output.	
+		// Figure out what filters the user wants.
 		List<String> whereClauses = new ArrayList<String>();
 		
 		boolean filterTrans = Helper.yesNoQuestion(input, "Would you like to filter your "
@@ -74,7 +73,6 @@ public class ShowHistory {
 	 * @param query The SQL statement to execute regarding the user's transaction history.
 	 */
 	private static void outputResults(DB db, String query) {
-		// Send query to db to be executed
 		ResultSet results = db.executeQuery(query);
 		
 		try {
@@ -88,19 +86,18 @@ public class ShowHistory {
 			int price;
 			
 			do {
-				price = results.getInt("price_in_cents");
+				price = results.getInt(DB.T_PRICE);
 				trans = new TransactionBuilder(price > 0);
 				
 				trans.setAmountInCents(price);
-				trans.setDescription(results.getString("description"));
-				trans.setDate(LocalDate.parse(results.getString("day")));
-				trans.setCategory(results.getString("catName"));
-				trans.setMemo(results.getString("memo"));
+				trans.setDescription(results.getString(DB.T_DESCRIP));
+				trans.setDate(LocalDate.parse(results.getString(DB.T_DATE)));
+				trans.setCategory(results.getString(DB.C_CAT));
+				trans.setMemo(results.getString(DB.T_MEMO));
 				output.add(trans.build());
 			} while (results.next());
 			
 			printInfo(output);
-			
 		} catch (SQLException e) {
 			Helper.printErrorToLog(e);
 		}
@@ -248,7 +245,7 @@ public class ShowHistory {
 	 */
 	private static void filterByDescription(Scanner input, List<String> whereClause) {
 		System.out.print("Which description would you like to include in your filter?\n> ");
-		whereClause.add(DB.T_TAB_ABBREV + ".description = '" + input.nextLine() + "'");
+		whereClause.add(DB.T_TAB_ABBREV + "." + DB.T_DESCRIP + " = '" + input.nextLine() + "'");
 	}
 	
 	/**
@@ -283,8 +280,8 @@ public class ShowHistory {
 				break;
 		}
 		
-		whereClause.add(DB.T_TAB_ABBREV + ".day >='" + from.toString() + "' AND " 
-				+ DB.T_TAB_ABBREV + ".day <='" + to.toString() + "'");
+		whereClause.add(DB.T_TAB_ABBREV + "." + DB.T_DATE + " >='" + from.toString() + "' AND " 
+				+ DB.T_TAB_ABBREV + "." + DB.T_DATE + " <='" + to.toString() + "'");
 	}
 	
 	/**
@@ -309,9 +306,9 @@ public class ShowHistory {
 				System.out.println("Your upper bound is below your lower bound.");
 		} while (upper < lower);
 		
-		whereClause.add(DB.T_TAB_ABBREV + ".price_in_cents >= '" 
+		whereClause.add(DB.T_TAB_ABBREV + "." + DB.T_PRICE + " >= '" 
 				+ lower * Helper.CENTS_IN_A_DOLLAR	+ "' AND " 
-				+ DB.T_TAB_ABBREV + ".price_in_cents <= '" 
+				+ DB.T_TAB_ABBREV + "." + DB.T_PRICE + " <= '" 
 				+ upper * Helper.CENTS_IN_A_DOLLAR + "'");
 	}
 	
@@ -336,7 +333,8 @@ public class ShowHistory {
 				System.out.println("Invalid cateogry choice.");
 		} while (category == null);
 
-		whereClause.add(DB.T_TAB_ABBREV + ".user_cat = '" + user.getUsername() + "_" + category + "'");
+		whereClause.add(DB.T_TAB_ABBREV + "." + DB.T_UCAT + " = '" + user.getUsername() 
+			+ "_" + category + "'");
 	}
 	
 	/**
@@ -346,6 +344,6 @@ public class ShowHistory {
 	 */
 	private static void filterByMemo(Scanner input, List<String> whereClause) {
 		System.out.print("Which memo would you like to include in your filter?\n> ");
-		whereClause.add(DB.T_TAB_ABBREV + ".memo = '" + input.nextLine() + "'");
+		whereClause.add(DB.T_TAB_ABBREV + "." + DB.T_MEMO + " = '" + input.nextLine() + "'");
 	}
 }

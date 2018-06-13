@@ -19,40 +19,20 @@ abstract class NewTransaction {
 	private static final int MAX_DESCR_CHARS = 20;
 	private static final int MAX_MEMO_CHARS = 20;
 	
-	// An array of strings containing the default user expense categories.
-	private static List<String> categories;
-	
 	/**
 	 * Creates a new transaction object using the user input.
 	 * @param input is the scanner which reads user input.
+	 * @param categoryNames The list of categories which are available to this user.
 	 */
 	protected static Transaction run(Scanner input, List<String> categoryNames) {
 		
-		// Get the type of the transaction
-		boolean isDeposit = getType(input);
-		
-		TransactionBuilder transfer = new TransactionBuilder(isDeposit);
-		categories = categoryNames;
-		
-		// Get the description of the TransactionBuilder.
+		TransactionBuilder transfer = new TransactionBuilder(getType(input));
 		setDescription(input, transfer);
-		
-		// Get the amount of the TransactionBuilder.
 		setAmount(input, transfer);
-		
-		// Get the date of the TransactionBuilder.
 		setDate(input, transfer);
-		
-		// Get the category of the TransactionBuilder.
-		setCategory(input, transfer);
-		
-		// Get the memo for the TransactionBuilder.
+		setCategory(input, transfer, categoryNames);
 		setMemo(input, transfer);
-		
-		// Ask user if all the information is set properly.
-		checkProperInfo(input, transfer);
-		
-		// Build Transaction.
+		checkProperInfo(input, transfer, categoryNames);
 		return transfer.build();
 	}
 	
@@ -74,20 +54,13 @@ abstract class NewTransaction {
 	private static void setDescription(Scanner input, TransactionBuilder transfer) {
 		String descr;
 		while (true) {
-			// Ask user the description of the transaction
 			System.out.print('\n' + "What is the description for this transaction?" + '\n' + "> ");
 			descr = input.nextLine();
-			
-			// Check if description is too long.
-			if (descr.length() > MAX_DESCR_CHARS) {
-				System.out.println("The description must be less than " + MAX_DESCR_CHARS
-						+ " characters long.");
-				continue;
-			}
-			
-			break;
+			if (descr.length() <= MAX_DESCR_CHARS)
+				break;
+			System.out.println("The description must be less than " + MAX_DESCR_CHARS
+					+ " characters long.");
 		}
-		
 		transfer.setDescription(descr);
 	}
 	
@@ -103,7 +76,8 @@ abstract class NewTransaction {
 			System.out.print('\n' + "What was the amount of the transaction?" + '\n' + "> ");
 			response = input.nextLine();
 			try {
-				transfer.setAmountInCents((int) Math.round(Double.parseDouble(response) * 100));
+				transfer.setAmountInCents((int) Math.round(Double.parseDouble(response) 
+						* Helper.CENTS_IN_A_DOLLAR));
 				break;
 				
 			} catch (NumberFormatException e) {
@@ -117,14 +91,12 @@ abstract class NewTransaction {
 	 * @param input is the scanner used to get user input.
 	 * @param transfer is the TransactionBuilder object whose date is being set.
 	 */
-	private static void setDate(Scanner input, TransactionBuilder transfer) {		
-		// If the transaction occurred today then set the transaction information
+	private static void setDate(Scanner input, TransactionBuilder transfer) {
 		if (Helper.yesNoQuestion(input, "Was the transaction made today?")) {
 			transfer.setDate(LocalDate.now());
 			return;
 		}
 		
-		// If transaction was not made today then get the day the transaction was made.
 		int[] dateInfo = new int[3];
 		Helper.setYear(input, dateInfo, "What year was the transaction made?");
 		Helper.setMonth(input, dateInfo, "What month was the transaction made?");
@@ -136,8 +108,10 @@ abstract class NewTransaction {
 	 * Sets the category of the TransactionBuilder.
 	 * @param input is the scanner used to get user input.
 	 * @param transfer is the TransactionBuilder object whose category is being set.
+	 * @param categories THe list of categories available to this user.
 	 */
-	private static void setCategory(Scanner input, TransactionBuilder transfer) {
+	private static void setCategory(Scanner input, TransactionBuilder transfer, 
+			List<String> categories) {
 		if (transfer.isADeposit()) {
 			transfer.setCategory("Deposit");
 			return;
@@ -146,8 +120,7 @@ abstract class NewTransaction {
 		while (true) {
 			System.out.print('\n' + "Avaliable categories are: ");
 			
-			// Print out all the categories with their corresponding number in front. 
-			// Fence post with comma
+			// Print out all the categories with their corresponding number in front.
 			for (int i = 0; i < categories.size() - 1; i++) {
 				System.out.print(i + "-" + categories.get(i) + ", ");
 			}
@@ -157,9 +130,8 @@ abstract class NewTransaction {
 			System.out.print("(You can add more cateogries from the settings menu.) \n"
 					+ "Please type the number corresponding to which category best fits"
 					+ " this transaction." + '\n' + "> ");
-			int catNum;
 			
-			// Attempt to parse an integer from the user input.
+			int catNum;
 			try {
 				catNum = Integer.parseInt(input.nextLine());
 			} catch (NumberFormatException e) {
@@ -167,14 +139,12 @@ abstract class NewTransaction {
 				continue;
 			}
 			
-			// If number is invalid then inform user and try again.
 			if (catNum < 0 || catNum >= categories.size()) {
 				System.out.println("Invalid response. Please type a number between 0 and " 
 						+ (categories.size() - 1) + ".");
 				continue;
 			}
 			
-			// Attempt to set the category of the expense.
 			try {
 				transfer.setCategory(categories.get(catNum));
 			} catch (IllegalArgumentException e) {
@@ -194,19 +164,14 @@ abstract class NewTransaction {
 	private static void setMemo(Scanner input, TransactionBuilder transfer) {
 		String memo;
 		
-		// Ask user for the memo of this transaction
 		while (true) {
 			System.out.print('\n' + "Please type the memo which will be attached to this "
 					+ "transaction." + '\n' + "> ");
 			memo = input.nextLine();
-			
-			if (memo.length() > MAX_MEMO_CHARS) {
-				System.out.println("The memo must be less than " + MAX_MEMO_CHARS
-						+ " characters long.");
-				continue;
-			}
-			
-			break;
+			if (memo.length() <= MAX_MEMO_CHARS)
+				break;
+			System.out.println("The memo must be less than " + MAX_MEMO_CHARS
+				+ " characters long.");
 		}
 		
 		transfer.setMemo(memo);
@@ -217,24 +182,16 @@ abstract class NewTransaction {
 	 * @param input is the scanner used to get user input.
 	 * @param transfer is the TransactionBuilder object whose information is being double checked
 	 * 		by the user.
+	 * @param categories The list of categories which are available to this user.
 	 * @modifies transfer if the user decides that they wish to edit some of the transaction 
 	 * 		information.
 	 */
-	private static void checkProperInfo(Scanner input, TransactionBuilder transfer) {
+	private static void checkProperInfo(Scanner input, TransactionBuilder transfer,
+			List<String> categories) {
 		System.out.println("The information of the transaction is as follows...");
-		printTransInfo(transfer);
-		boolean answer;
-		
-		while (true) {	
-			String question = "Would you like to edit anything?";
-			answer = Helper.yesNoQuestion(input, question);
-			
-			// If the information is not correct then have the user edit the information.
-			if (answer) {
-				editTransInfo(input, transfer);
-			} else {
-				break;
-			}
+		printTransInfo(transfer);		
+		while (!Helper.yesNoQuestion(input, "Would you like to edit anything?")) {
+			editTransInfo(input, transfer, categories);
 		}
 	}
 
@@ -242,9 +199,11 @@ abstract class NewTransaction {
 	 * Allows the user to edit any of the transaction's information.
 	 * @param input is the scanner to read user input.
 	 * @param transfer is the TransactionBuilder whose information will be edited.
+	 * @param categories List of categories available to this user.
 	 * @modifies The transactions information where the user sees fit.
 	 */
-	private static void editTransInfo(Scanner input, TransactionBuilder transfer) {
+	private static void editTransInfo(Scanner input, TransactionBuilder transfer, 
+			List<String> categories) {
 		System.out.println('\n' + "Type '0' to edit the description.");
 		System.out.println("Type '1' to edit the amount.");
 		System.out.println("Type '2' to edit the date.");
@@ -276,7 +235,7 @@ abstract class NewTransaction {
 					break;
 					
 				case 3:
-					setCategory(input, transfer);
+					setCategory(input, transfer, categories);
 					break;
 					
 				case 4:
@@ -285,19 +244,15 @@ abstract class NewTransaction {
 					
 				case 5:
 					transfer.setAsDeposit(getType(input));
-					// Reset the amount of the transaction because the type may have changed.
 					transfer.setAmountInCents(transfer.getAmountInCents());
 					break;
 					
 				default:
 					System.out.println("Invalid response please type a number 0-5.");
-					continue;
-					
+					continue;	
 			}
-			
 			break;
 		}
-
 		System.out.println("The updated transaction information is as follows...");
 		printTransInfo(transfer);
 	}

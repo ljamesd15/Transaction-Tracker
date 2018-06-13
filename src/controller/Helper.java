@@ -30,6 +30,7 @@ public class Helper {
 	// The formatter we will use for all decimal outputs.
 	private static final DecimalFormat DF = new DecimalFormat("#,###.00");
 	public static final int CENTS_IN_A_DOLLAR = 100;
+	private static final int MONTHS_IN_A_YEAR = 12;
 	
 	/** Prepares the log file for any errors which might occur. */
 	public static void prepare() {
@@ -39,6 +40,11 @@ public class Helper {
 			System.out.println("Could not set up connection to log file.");
 			System.exit(1);
 		}
+	}
+	
+	/** Prepares this class to be shut down. */
+	public static void close() {
+		pw.close();
 	}
 	
     /**
@@ -140,7 +146,7 @@ public class Helper {
 	 */
 	public static void setMonth(Scanner input, int[] dateInfo, String question) {
 		LocalDate today = LocalDate.now();			
-		int maxMonth = 12;
+		int maxMonth = MONTHS_IN_A_YEAR;
 		if (dateInfo[0] == today.getYear())
 			maxMonth = today.getMonthValue();
 		dateInfo[1] = Helper.numberResponse(input, question, 1, maxMonth);
@@ -159,6 +165,8 @@ public class Helper {
 		if (dateInfo[0] == today.getYear() && dateInfo[1] == today.getMonthValue())
 			maxDay = today.getDayOfMonth();
 		dateInfo[2] = Helper.numberResponse(input, question, 1, maxDay);
+		// The number 1 is used only as a random day which will have always occurred in the
+		// current month we are in and occurs in every month.
 	}
     
     /**
@@ -166,7 +174,6 @@ public class Helper {
      * @param e is the exception.
      */
     public static void printErrorToLog(Exception e) {
-		// Get the local date and time.
 		LocalDate currDate = LocalDate.now();
 		LocalTime currTime = LocalTime.now();
 		
@@ -176,9 +183,6 @@ public class Helper {
 		pw.println("!STACK TRACE");
 		e.printStackTrace(pw);
 		pw.println();
-		pw.close();
-		
-		// Alert user to error.
 		System.out.println("Something went wrong, please see log file at " + FILEPATH + "\\.log.");
     }
     
