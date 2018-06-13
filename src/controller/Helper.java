@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -46,19 +48,48 @@ public class Helper {
      * @return A true for yes and a false for no.
      */
     public static boolean yesNoQuestion(Scanner input, String question) {
+    	String[] options = new String[] {"yes", "no"};
+    	String[] yes = new String[] {"y"};
+    	String[] no = new String[] {"n"};
+    	Map<String, String[]> abbrevs = new HashMap<String, String[]>();
+    	abbrevs.put(options[0], yes);
+    	abbrevs.put(options[1], no);
+    	
+    	String response = Helper.multipleChoiceQuestion(input, question, options, abbrevs);
+    	return response.equals(options[0]);
+    }
+    
+    /**
+     * Asks a user which has a limited number of possible answers.
+     * @param input The scanner to read user input.
+     * @param question The question which the user will be prompted with.
+     * @param answers The list of acceptable answers.
+     * @param answerAbbrevs Each answer from answers has a list of acceptable abbreviations a 
+     * user can use to choose this option.
+     * @return The string from answers which the user picked.
+     */
+    public static String multipleChoiceQuestion(Scanner input, String question, String[] answers,
+    		Map<String, String[]> answerAbbrevs) {
     	String response;
     	
 		while (true) {
 			System.out.print('\n' + question + '\n' + "> ");
 			response = input.nextLine();
 			
-	    	if (response.equalsIgnoreCase("yes") || response.equalsIgnoreCase("y")) {
-	    		return true;
-	    	} else if (response.equalsIgnoreCase("no") || response.equalsIgnoreCase("n") ) {
-	    		return false;
-	    	} else {
-	    		System.out.println("Invalid response. Please type 'yes' or 'no'");
-	    	}
+			for (int i = 0; i < answers.length; i++) {
+				if (response.equalsIgnoreCase(answers[i]))
+					return answers[i];
+				for (int j = 0; j < answerAbbrevs.get(answers[i]).length; j++) {
+					if (response.equalsIgnoreCase(answerAbbrevs.get(answers[i])[j]))
+						return answers[i];
+				}
+			}
+			
+	    	System.out.print("Invalid response. Avaliable options are ");
+			for (int i = 0; i < answers.length - 1; i++) {
+				System.out.print("'" + answers[i] + "', ");
+			}
+			System.out.println("or '" + answers[answers.length - 1]+ "'.");
 		}
     }
     
@@ -176,6 +207,10 @@ public class Helper {
 		}
 	}
 	
+	/**
+	 * Formats an amount in cents to a double with 2 places after the decimal along with commas
+	 * if necessary.
+	 */
 	public static String amountInCentsToFormattedDouble(int amount) {
 		return DF.format((double)amount / CENTS_IN_A_DOLLAR);
 	}

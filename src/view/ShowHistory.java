@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import controller.Helper;
@@ -190,6 +192,21 @@ public class ShowHistory {
 			case 5: // Memo
 				orderByClause[orderPriority] = DB.T_TAB_ABBREV + ".memo";
 				break;
+		}
+		
+		String[] options = new String[] {"Ascending", "Descending"};
+		String[] asc = new String[] {"a", "asc"};
+		String[] desc = new String[] {"d", "desc"};
+		Map<String, String[]> abbrevs = new HashMap<String, String[]>();
+		abbrevs.put(options[0], asc);
+		abbrevs.put(options[1], desc);
+		
+		String response = Helper.multipleChoiceQuestion(input, 
+				"Would you like it ordered in ascending or descending order?", options, abbrevs);
+		if (response.equals(options[0])) {
+			orderByClause[orderPriority] += " ASC";
+		} else {
+			orderByClause[orderPriority] += " DESC";
 		}
 	}
 	
