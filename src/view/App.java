@@ -12,7 +12,8 @@ import model.BCrypt;
 
 /**
  * Text based interface for clients to query and update the database in order to log in, add 
- * transactions, breakdown expenses via date, price, categories, and more.
+ * transactions, view previous transactions, and breakdown expenses via Transaction attributes
+ * such as date, price, categories, and more.
  * @author L. James Davidson
  */
 public class App {
